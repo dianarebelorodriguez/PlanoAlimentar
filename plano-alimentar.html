@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plano Alimentar – Registro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ed; --surface:#fff; --surface-2:#f1ede4; --text:#1b1a17; --muted:#6e685d;
+  --line:#e4ded2; --accent:#2f6f4e; --accent-ink:#fff; --accent-soft:#e3efe7;
+  --carb:#c8763c; --fat:#7a6aa8; --prot:#2f6f4e;
+  --danger:#b03b3b; --ok:#2f6f4e; --warn:#b07d2b;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 1px 2px rgba(27,26,23,.05), 0 8px 24px rgba(27,26,23,.06);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131411; --surface:#1c1e1a; --surface-2:#232520; --text:#eceade; --muted:#a09a8c;
+  --line:#2f3229; --accent:#5fa87d; --accent-ink:#0f130f; --accent-soft:#22302a;
+  --carb:#dc9560; --fat:#9d8fc9; --prot:#5fa87d; --danger:#d97070; --ok:#5fa87d; --warn:#d0a052;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --bg:#131411; --surface:#1c1e1a; --surface-2:#232520; --text:#eceade; --muted:#a09a8c;
+  --line:#2f3229; --accent:#5fa87d; --accent-ink:#0f130f; --accent-soft:#22302a;
+  --carb:#dc9560; --fat:#9d8fc9; --prot:#5fa87d; --danger:#d97070; --ok:#5fa87d; --warn:#d0a052;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.01em}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:840px;margin:0 auto;padding:0 16px 120px}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-inner{max-width:840px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.brand{font-family:Fraunces,serif;font-size:17px;flex:1;line-height:1.15}
+.brand small{display:block;font-family:Inter,sans-serif;font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+.icon-btn{background:var(--surface);border:1px solid var(--line);border-radius:999px;width:34px;height:34px;display:grid;place-items:center;font-size:14px;flex:none}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--surface) 95%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs-inner{max-width:840px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:0}
+.tab{background:none;border:0;padding:12px 4px 14px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:13px;font-weight:600}
+.tab .ic{font-size:17px;line-height:1}
+.tab[aria-selected="true"]{color:var(--accent)}
+.tab[aria-selected="true"]::after{content:"";position:absolute}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.sec-title{display:flex;align-items:baseline;gap:8px;margin:20px 2px 9px}
+.sec-title h2{font-size:16px;margin:0;flex:1}
+.sec-title .hint{font-size:11.5px;color:var(--muted)}
+
+.day-nav{display:flex;align-items:center;gap:8px;margin:14px 0 10px}
+.day-nav .d-label{flex:1;text-align:center;font-weight:600;font-size:14px}
+.day-nav .d-label small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.plan-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.plan-chip{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.25}
+.plan-chip b{display:block;font-size:12.5px}
+.plan-chip span{font-weight:500;font-size:10.5px;opacity:.85}
+.plan-chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.kcal-box{padding:16px 18px 14px;text-align:center}
+.kcal-big{font-family:Fraunces,serif;font-size:36px;line-height:1}
+.kcal-big span{font-size:14px;color:var(--muted);font-family:Inter,sans-serif;font-weight:500}
+.kcal-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .3s}
+.bar.over>i{background:var(--warn)}
+.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px 16px}
+.macro{background:var(--surface-2);border-radius:var(--radius-sm);padding:9px 10px}
+.macro .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.macro .val{font-size:14px;font-weight:600;margin-top:1px}
+.macro .val small{font-weight:500;color:var(--muted);font-size:11px}
+.macro .bar{height:5px;margin-top:6px}
+.macro.p .bar>i{background:var(--prot)}.macro.c .bar>i{background:var(--carb)}.macro.g .bar>i{background:var(--fat)}
+
+.rmeal{padding:0}
+.rmeal+.rmeal{border-top:1px solid var(--line)}
+.rmeal-head{display:flex;align-items:center;gap:8px;padding:12px 16px 8px}
+.rmeal-head b{flex:1;font-family:Fraunces,serif;font-size:15px;font-weight:600}
+.rmeal-head .k{font-size:12px;color:var(--muted);white-space:nowrap}
+.rows{list-style:none;margin:0;padding:0 16px}
+.rows li{display:flex;gap:9px;align-items:baseline;padding:6px 0;border-top:1px dashed var(--line);font-size:13.5px}
+.rows li .nm{flex:1;min-width:0}
+.rows li .nm small{display:block;color:var(--muted);font-size:11px}
+.rows li .kc{font-size:12.5px;font-weight:600;white-space:nowrap}
+.acts{display:flex;gap:7px;padding:9px 16px 13px;flex-wrap:wrap}
+.mini{background:var(--surface-2);border:0;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:600;color:var(--text)}
+.mini.pri{background:var(--accent);color:var(--accent-ink)}
+.x{background:none;border:0;color:var(--muted);font-size:15px;padding:0 2px;line-height:1}
+.x:hover{color:var(--danger)}
+.empty{padding:22px 18px;text-align:center;color:var(--muted);font-size:13px}
+
+.meal{padding:13px 16px}
+.meal+.meal{border-top:1px solid var(--line)}
+.meal-head{display:flex;align-items:baseline;gap:9px}
+.meal-name{font-family:Fraunces,serif;font-size:15.5px;flex:1}
+.meal-kcal{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.pill{background:var(--surface-2);border:1px solid transparent;border-radius:99px;padding:5px 11px;font-size:12px;font-weight:600;color:var(--muted)}
+.pill[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.items{list-style:none;margin:10px 0 0;padding:0}
+.items>li{padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.items>li:last-child{border-bottom:0}
+.items .nm{display:flex;gap:8px}
+.items .nm .a{flex:1}
+.items .qtd{color:var(--muted);font-size:11.5px;text-align:right;max-width:48%}
+.subs summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:11.5px;list-style:none;margin-top:3px}
+.subs summary::-webkit-details-marker{display:none}
+.subs summary::before{content:"⇄ "}
+.subs ul{margin:5px 0 2px;padding-left:16px;font-size:12px;color:var(--muted)}
+.obs{margin-top:9px;font-size:12px;color:var(--muted);background:var(--surface-2);padding:8px 10px;border-radius:var(--radius-sm)}
+.mtot{margin-top:8px;font-size:11.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.mtot b{color:var(--text);font-weight:600}
+.tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--surface-2);color:var(--muted);border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:1px}
+
+.water{display:flex;align-items:center;gap:10px;padding:13px 16px}
+.water .wv{font-family:Fraunces,serif;font-size:18px;min-width:108px}
+.water .wv small{font-family:Inter,sans-serif;font-size:11px;color:var(--muted);font-weight:500}
+.water .grow{flex:1}
+
+.chart{display:flex;align-items:flex-end;gap:7px;height:110px;padding:14px 16px 6px}
+.chart .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:4px}
+.chart .stack{width:100%;background:var(--surface-2);border-radius:5px 5px 0 0;position:relative;overflow:hidden;flex:1}
+.chart .stack>i{position:absolute;left:0;right:0;bottom:0;background:var(--accent)}
+.chart .stack.over>i{background:var(--warn)}
+.chart .cl{font-size:9.5px;color:var(--muted);text-align:center}
+.hist-row{display:flex;gap:10px;padding:9px 16px;font-size:13px;align-items:center}
+.hist-row+.hist-row{border-top:1px solid var(--line)}
+.hist-row .hd{flex:1;min-width:0}
+.hist-row .hd small{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.field{padding:12px 16px}
+.field+.field{border-top:1px solid var(--line)}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.inp{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:9px 11px;font-size:14px}
+textarea.inp{min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size:11px;resize:vertical}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:99px;padding:9px 15px;font-size:13px;font-weight:600}
+.btn.ghost{background:var(--surface-2);color:var(--text)}
+.btn.block{display:block;width:100%;text-align:center;padding:12px;border-radius:var(--radius-sm)}
+
+.sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(20,18,14,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:580px;max-height:92vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;border:1px solid var(--line)}
+@media(min-width:640px){.sheet-bg{align-items:center;padding:20px}.sheet{border-radius:20px;max-height:86vh}}
+.sheet-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex:none}
+.sheet-head h3{margin:0;font-size:16px;flex:1}
+.sheet-body{padding:13px 16px;overflow:auto;flex:1}
+.sheet-foot{border-top:1px solid var(--line);padding:11px 16px calc(11px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;flex:none}
+.sheet-foot .tot{flex:1;font-size:11.5px;color:var(--muted);line-height:1.35}
+.sheet-foot .tot b{color:var(--text);font-size:14px}
+.cats{display:flex;gap:6px;overflow-x:auto;padding:8px 0 4px;-webkit-overflow-scrolling:touch}
+.cats .pill{white-space:nowrap}
+.flist{list-style:none;margin:6px 0 0;padding:0}
+.flist li{padding:9px 2px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:baseline;cursor:pointer}
+.flist li:hover{background:var(--surface-2)}
+.flist .fn{flex:1;font-size:13.5px}
+.flist .fn small{display:block;color:var(--muted);font-size:11px}
+.flist .fk{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.banner{margin:12px 0 0;padding:10px 12px;border-radius:var(--radius-sm);font-size:12px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.banner b{color:var(--text)}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="top-inner">
+  <div class="brand">Plano Alimentar<small id="subTitle">planos &amp; registro</small></div>
+  <button class="icon-btn" data-act="openAjustes" title="Ajustes">⚙</button>
+  <button class="icon-btn" id="themeBtn" title="Tema">◐</button>
+</div></header>
+
+<main class="wrap">
+  <section id="view"></section>
+</main>
+
+<nav class="tabs"><div class="tabs-inner">
+  <button class="tab" data-tab="registro" aria-selected="true"><span class="ic">✓</span>Registro</button>
+  <button class="tab" data-tab="planos" aria-selected="false"><span class="ic">☰</span>Planos</button>
+</div></nav>
+
+<div id="sheetHost"></div>
+
+<script>
+/* ==========================================================================
+   A. BANCO DE ALIMENTOS – valores por 100 g
+   fonte: 'TACO' (tabela brasileira, valores de referência), 'rótulo' (produto
+   de marca, aproximado), 'plano' (derivado dos macros impressos no PDF),
+   'estimativa' (preparação composta / variável).
+   Todos os valores são de referência e podem ser editados no app.
+   ========================================================================== */
+function F(id,nome,cat,kcal,p,c,g,fonte,med){
+  return {id:id,nome:nome,cat:cat,kcal:kcal,p:p,c:c,g:g,fonte:fonte,med:med||[]};
+}
+var CS='colher de sopa', CC='colher de chá', CSV='colher de servir', UN='unidade', FT='fatia', XIC='xícara';
+
+var ALIM_BASE = [
+/* --- Cereais, pães e massas --- */
+F('arroz-branco','Arroz branco cozido','Cereais e massas',128,2.5,28.1,0.2,'TACO',[[CS,25],[CSV,55]]),
+F('arroz-integral','Arroz integral cozido','Cereais e massas',124,2.6,25.8,1.0,'TACO',[[CS,25],[CSV,55]]),
+F('macarrao','Macarrão cozido','Cereais e massas',140,5.0,28.0,1.1,'estimativa',[[CS,30],[XIC,140]]),
+F('macarrao-arroz','Macarrão de arroz cozido','Cereais e massas',109,2.0,24.9,0.2,'estimativa',[[CS,30]]),
+F('macarrao-integral','Macarrão integral cozido','Cereais e massas',124,5.3,26.5,0.9,'estimativa',[[CS,30]]),
+F('quinoa','Quinoa cozida','Cereais e massas',120,4.4,21.3,1.9,'estimativa',[[CS,25]]),
+F('cuscuz-milho','Cuscuz de milho cozido','Cereais e massas',113,2.4,25.3,0.6,'TACO',[[FT,80]]),
+F('pao-frances','Pão francês','Cereais e massas',300,8.0,58.6,3.1,'TACO',[[UN,50]]),
+F('pao-forma','Pão de forma branco','Cereais e massas',275,8.0,52.0,3.5,'estimativa',[[FT,25]]),
+F('pao-forma-integral','Pão de forma integral','Cereais e massas',253,9.4,49.9,3.5,'TACO',[[FT,25]]),
+F('goma-tapioca','Goma de tapioca (hidratada)','Cereais e massas',290,0.3,71.5,0.1,'estimativa',[[CS,15]]),
+F('aveia','Aveia em flocos','Cereais e massas',394,13.9,66.6,8.5,'TACO',[[CS,15]]),
+F('granola','Granola sem açúcar','Cereais e massas',450,10.0,60.0,17.0,'estimativa',[[CS,15]]),
+F('bolacha-arroz','Bolacha de arroz','Cereais e massas',385,8.0,81.0,3.0,'rótulo',[[UN,7.5]]),
+F('pipoca','Pipoca sem óleo (estourada)','Cereais e massas',387,12.0,78.0,4.3,'estimativa',[[XIC,10]]),
+F('farofa','Farofa pronta','Cereais e massas',405,3.5,60.0,17.0,'estimativa',[[CS,15]]),
+F('pao-queijo','Pão de queijo','Cereais e massas',295,5.0,30.0,17.0,'estimativa',[[UN,30]]),
+
+/* --- Tubérculos --- */
+F('batata','Batata inglesa cozida','Tubérculos',52,1.2,11.9,0.1,'TACO',[[UN,100]]),
+F('batata-doce','Batata-doce cozida','Tubérculos',77,0.6,18.4,0.1,'TACO',[[FT,40]]),
+F('mandioca','Mandioca cozida','Tubérculos',125,0.6,30.1,0.3,'TACO',[]),
+F('pure-batata','Purê de batata','Tubérculos',93,1.8,14.0,3.4,'estimativa',[[CS,25]]),
+F('batata-frita','Batata frita','Tubérculos',312,4.0,36.0,16.5,'estimativa',[[XIC,80]]),
+
+/* --- Leguminosas --- */
+F('feijao-preto','Feijão preto cozido','Leguminosas',77,4.5,14.0,0.5,'TACO',[['concha',80]]),
+F('feijao-carioca','Feijão carioca cozido','Leguminosas',76,4.8,13.6,0.5,'TACO',[['concha',80]]),
+F('lentilha','Lentilha cozida','Leguminosas',93,6.3,16.3,0.5,'TACO',[['concha',80]]),
+F('grao-de-bico','Grão-de-bico cozido','Leguminosas',164,8.9,27.4,2.6,'estimativa',[[CS,30]]),
+F('feijao-fradinho','Feijão-fradinho cozido','Leguminosas',78,5.1,13.5,0.5,'TACO',[['concha',80]]),
+F('homus','Homus','Leguminosas',177,7.9,14.3,9.6,'estimativa',[[CS,25]]),
+F('edamame','Edamame cozido','Leguminosas',125,11.0,9.0,5.2,'estimativa',[]),
+
+/* --- Carnes, aves, peixes e ovos --- */
+F('frango-grelhado','Peito de frango grelhado','Carnes e ovos',159,32.0,0,2.5,'TACO',[[CS,20]]),
+F('frango-korin','Frango Korin grelhado (peito)','Carnes e ovos',159,32.0,0,2.5,'estimativa',[]),
+F('coxa-frango','Coxa/sobrecoxa de frango assada','Carnes e ovos',215,26.9,0,11.8,'TACO',[]),
+F('frango-crispy','Frango empanado frito','Carnes e ovos',280,20.0,16.0,15.0,'estimativa',[]),
+F('patinho','Patinho moído cozido','Carnes e ovos',219,35.9,0,7.3,'TACO',[[CS,20]]),
+F('carne-moida','Carne moída (acém) cozida','Carnes e ovos',212,26.7,0,11.0,'TACO',[[CS,20]]),
+F('contrafile','Contrafilé grelhado','Carnes e ovos',278,32.0,0,16.0,'TACO',[]),
+F('picanha','Picanha grelhada','Carnes e ovos',289,26.0,0,20.0,'estimativa',[]),
+F('lombo-porco','Lombo de porco assado','Carnes e ovos',210,32.0,0,8.5,'estimativa',[]),
+F('linguica','Linguiça toscana grelhada','Carnes e ovos',300,17.0,1.0,25.0,'estimativa',[[UN,60]]),
+F('bacon','Bacon frito','Carnes e ovos',541,37.0,0,43.0,'estimativa',[[FT,10]]),
+F('tilapia','Tilápia grelhada','Carnes e ovos',128,26.0,0,2.3,'estimativa',[[FT,120]]),
+F('truta','Truta grelhada','Carnes e ovos',150,25.0,0,5.2,'estimativa',[]),
+F('salmao','Salmão grelhado','Carnes e ovos',208,23.0,0,12.5,'estimativa',[[FT,120]]),
+F('camarao','Camarão cozido','Carnes e ovos',99,20.9,0,1.2,'estimativa',[]),
+F('polvo','Polvo cozido','Carnes e ovos',164,29.8,4.4,2.1,'estimativa',[]),
+F('atum-oleo','Atum em conserva em óleo (drenado)','Carnes e ovos',166,26.2,0,6.3,'TACO',[[CS,16]]),
+F('atum-agua','Atum em conserva em água (drenado)','Carnes e ovos',116,26.0,0,1.0,'rótulo',[[CS,16]]),
+F('atum-mimi','Atum Mimi (pote, com o líquido)','Carnes e ovos',82,18.0,0,0.9,'rótulo',[['pote',120]]),
+F('sardinha','Sardinha em conserva','Carnes e ovos',208,24.0,0,12.0,'estimativa',[]),
+F('ovo-cozido','Ovo de galinha cozido','Carnes e ovos',146,13.3,0.6,9.5,'TACO',[[UN,50]]),
+F('ovo-mexido','Ovo mexido (com pouco óleo)','Carnes e ovos',196,13.6,1.6,15.0,'estimativa',[[UN,55]]),
+F('clara','Clara de ovo cozida','Carnes e ovos',52,10.9,0.7,0.2,'TACO',[[UN,33]]),
+F('peito-peru','Peito de peru fatiado','Carnes e ovos',96,16.0,3.0,2.0,'rótulo',[[FT,15]]),
+F('presunto','Presunto magro','Carnes e ovos',122,17.0,2.0,5.0,'rótulo',[[FT,15]]),
+
+/* --- Laticínios --- */
+F('leite-integral','Leite integral','Laticínios',61,3.2,4.7,3.3,'TACO',[['copo (200 ml)',200]]),
+F('leite-desnatado','Leite desnatado','Laticínios',35,3.4,4.9,0.2,'TACO',[['copo (200 ml)',200]]),
+F('leite-po-desnatado','Leite em pó desnatado (MOLICO)','Laticínios',357,35.0,52.0,1.0,'rótulo',[[CS,10]]),
+F('iogurte-natural','Iogurte natural integral','Laticínios',62,3.6,4.8,3.0,'TACO',[['pote',170]]),
+F('iogurte-natural-desnatado','Iogurte natural desnatado (Danone)','Laticínios',41,4.1,5.6,0.2,'rótulo',[['pote',160]]),
+F('iogurte-batavo-morango-zero','Iogurte Batavo Morango Zero','Laticínios',47,3.4,6.1,1.5,'rótulo',[['pote',170]]),
+F('iogurte-grego-zero','Iogurte Vigor Grego Zero','Laticínios',55,8.5,4.5,0.3,'rótulo',[['pote',90]]),
+F('iogurte-grego-tradicional','Iogurte grego tradicional','Laticínios',135,3.5,15.0,6.5,'estimativa',[['pote',100]]),
+F('queijo-minas','Queijo minas frescal','Laticínios',264,17.4,3.2,20.2,'TACO',[[FT,30]]),
+F('queijo-minas-padrao','Queijo minas padrão','Laticínios',321,22.7,1.6,25.0,'TACO',[[FT,30]]),
+F('mussarela','Queijo mussarela','Laticínios',330,22.6,3.0,25.2,'TACO',[[FT,20]]),
+F('parmesao','Queijo parmesão','Laticínios',453,35.6,1.7,33.5,'TACO',[[CS,10]]),
+F('cottage','Queijo cottage','Laticínios',98,11.0,3.0,4.3,'rótulo',[[CS,25]]),
+F('creme-ricota-light','Creme de ricota light','Laticínios',160,8.0,4.0,12.0,'rótulo',[[CS,20]]),
+F('requeijao','Requeijão cremoso','Laticínios',257,9.6,3.0,23.0,'TACO',[[CS,20]]),
+F('manteiga','Manteiga','Laticínios',760,0.4,0.1,84.0,'TACO',[[CC,5]]),
+F('creme-de-leite','Creme de leite','Laticínios',218,2.1,3.7,21.5,'estimativa',[[CS,15]]),
+
+/* --- Frutas --- */
+F('banana-prata','Banana prata','Frutas',98,1.3,26.0,0.1,'TACO',[[UN,55]]),
+F('banana-nanica','Banana nanica','Frutas',92,1.4,23.8,0.1,'TACO',[[UN,85]]),
+F('maca','Maçã com casca','Frutas',56,0.3,15.2,0.1,'TACO',[[UN,130]]),
+F('mamao','Mamão formosa','Frutas',45,0.8,11.6,0.1,'TACO',[[FT,120]]),
+F('manga','Manga','Frutas',64,0.4,16.7,0.2,'TACO',[[UN,150]]),
+F('abacaxi','Abacaxi','Frutas',48,0.9,12.3,0.1,'TACO',[[FT,75]]),
+F('pera','Pera','Frutas',53,0.6,14.0,0.1,'TACO',[[UN,130]]),
+F('morango','Morango','Frutas',30,0.9,6.8,0.3,'TACO',[[UN,12]]),
+F('kiwi','Kiwi','Frutas',51,1.3,11.5,0.6,'estimativa',[[UN,76]]),
+F('mirtilo','Mirtilo','Frutas',57,0.7,14.5,0.3,'estimativa',[[UN,2]]),
+F('amora','Amora','Frutas',43,1.4,9.6,0.5,'estimativa',[]),
+F('cereja','Cereja','Frutas',63,1.1,16.0,0.2,'estimativa',[[UN,8]]),
+F('laranja','Laranja','Frutas',37,1.0,8.9,0.1,'TACO',[[UN,130]]),
+F('tangerina','Tangerina','Frutas',38,0.8,9.6,0.1,'TACO',[[UN,120]]),
+F('uva','Uva','Frutas',53,0.7,13.6,0.2,'TACO',[]),
+F('melancia','Melancia','Frutas',33,0.9,8.1,0.1,'TACO',[[FT,200]]),
+F('melao','Melão','Frutas',29,0.7,7.5,0.1,'TACO',[[FT,90]]),
+F('goiaba','Goiaba','Frutas',54,1.1,13.0,0.4,'TACO',[[UN,130]]),
+F('abacate','Abacate','Frutas',96,1.2,6.0,8.4,'TACO',[[CS,25]]),
+F('salada-de-frutas','Salada de frutas','Frutas',50,0.6,12.8,0.2,'estimativa',[[XIC,140]]),
+F('damasco-seco','Damasco seco','Frutas',241,3.4,63.0,0.5,'estimativa',[[UN,7]]),
+F('uva-passa','Uva-passa','Frutas',299,3.1,79.0,0.5,'TACO',[[CS,10]]),
+F('coco-ralado','Coco ralado','Frutas',406,3.4,10.4,42.0,'TACO',[[CS,8]]),
+
+/* --- Hortaliças --- */
+F('salada-folhas','Salada de folhas (alface, rúcula, agrião)','Hortaliças',16,1.4,2.3,0.2,'TACO',[['prato',80]]),
+F('hortalicas-cruas','Hortaliças cruas variadas (tomate, pepino, cenoura)','Hortaliças',20,0.9,4.4,0.1,'estimativa',[]),
+F('legumes-cozidos','Legumes cozidos variados','Hortaliças',40,1.8,7.4,0.4,'estimativa',[[CSV,55]]),
+F('tomate','Tomate','Hortaliças',15,1.1,3.1,0.2,'TACO',[[UN,90]]),
+F('tomate-cereja','Tomate cereja','Hortaliças',18,0.9,3.9,0.2,'estimativa',[[UN,10]]),
+F('pepino','Pepino','Hortaliças',10,0.9,2.0,0.1,'TACO',[[UN,170]]),
+F('cenoura','Cenoura crua','Hortaliças',34,1.3,7.7,0.2,'TACO',[[CS,14]]),
+F('brocolis','Brócolis cozido','Hortaliças',25,2.1,4.4,0.5,'TACO',[[CSV,40]]),
+F('couve-flor','Couve-flor cozida','Hortaliças',19,1.2,3.9,0.3,'TACO',[]),
+F('abobrinha','Abobrinha cozida','Hortaliças',19,1.1,3.0,0.2,'TACO',[]),
+F('chuchu','Chuchu cozido','Hortaliças',19,0.4,4.8,0.1,'TACO',[]),
+F('vagem','Vagem cozida','Hortaliças',25,1.8,5.0,0.2,'TACO',[]),
+F('berinjela','Berinjela cozida','Hortaliças',19,0.7,4.4,0.1,'TACO',[]),
+F('abobora-cabotia','Abóbora cabotiá cozida','Hortaliças',48,1.4,11.0,0.4,'TACO',[[CSV,60]]),
+F('beterraba','Beterraba cozida','Hortaliças',32,1.3,7.2,0.1,'TACO',[]),
+F('palmito','Palmito pupunha em conserva','Hortaliças',31,2.3,4.7,0.4,'estimativa',[[CS,15]]),
+F('couve','Couve refogada','Hortaliças',90,1.7,8.7,5.9,'TACO',[[CSV,40]]),
+F('espinafre','Espinafre refogado','Hortaliças',30,2.7,3.0,1.2,'estimativa',[]),
+F('repolho','Repolho cru','Hortaliças',25,1.3,5.8,0.1,'TACO',[]),
+F('milho-verde','Milho verde cozido','Hortaliças',98,3.2,20.0,1.0,'TACO',[[CS,15]]),
+
+/* --- Oleaginosas, sementes e gorduras --- */
+F('azeite','Azeite de oliva','Gorduras',884,0,0,100,'TACO',[[CC,5],[CS,13]]),
+F('oleo-soja','Óleo vegetal','Gorduras',884,0,0,100,'TACO',[[CS,13]]),
+F('chia','Semente de chia','Gorduras',486,16.5,42.1,30.7,'estimativa',[[CS,12]]),
+F('linhaca','Linhaça','Gorduras',495,14.1,43.3,32.3,'TACO',[[CS,10]]),
+F('psyllium','Psyllium','Gorduras',35,1.5,8.0,0.5,'rótulo',[[CS,5]]),
+F('castanha-do-para','Castanha-do-pará','Gorduras',643,14.5,15.1,63.5,'TACO',[[UN,4]]),
+F('castanha-caju','Castanha de caju','Gorduras',570,18.5,29.1,46.3,'TACO',[[UN,2]]),
+F('amendoa','Amêndoa','Gorduras',581,21.0,20.0,47.0,'TACO',[[UN,1.2]]),
+F('nozes','Nozes','Gorduras',620,14.0,18.0,59.0,'TACO',[[UN,5]]),
+F('amendoim','Amendoim torrado','Gorduras',544,27.2,20.3,43.9,'TACO',[[CS,10]]),
+F('pasta-amendoim','Pasta de amendoim integral','Gorduras',588,25.0,20.0,48.0,'rótulo',[[CC,6],[CS,16]]),
+F('maionese','Maionese','Gorduras',700,1.0,3.0,75.0,'estimativa',[[CS,12]]),
+
+/* --- Açúcares e doces --- */
+F('acucar','Açúcar refinado','Doces',387,0,99.5,0,'TACO',[[CC,4],[CS,12]]),
+F('mel','Mel','Doces',309,0.1,84.0,0,'TACO',[[CC,7],[CS,20]]),
+F('doce-de-leite','Doce de leite cremoso','Doces',306,5.5,59.0,6.0,'TACO',[[CS,25]]),
+F('chocolate-po','Chocolate em pó','Doces',380,5.0,80.0,4.0,'rótulo',[[CS,10]]),
+F('achocolatado','Achocolatado em pó','Doces',400,3.5,90.0,2.0,'rótulo',[[CS,10]]),
+F('goiabada','Goiabada','Doces',270,0.6,67.0,0.1,'TACO',[[FT,50]]),
+F('bananinha','Bananinha / doce de banana','Doces',260,1.5,65.0,0.2,'estimativa',[[UN,25]]),
+F('geleia-diet','Geleia diet','Doces',120,0.3,28.0,0.1,'rótulo',[[CS,20]]),
+F('geleia','Geleia tradicional','Doces',260,0.4,65.0,0.1,'estimativa',[[CS,20]]),
+F('chocolate-ao-leite','Chocolate ao leite','Doces',540,7.0,59.0,30.0,'TACO',[['quadradinho',6]]),
+F('chocolate-70','Chocolate 70% cacau','Doces',570,8.0,34.0,42.0,'estimativa',[['quadradinho',6]]),
+F('brigadeiro','Brigadeiro','Doces',390,4.0,55.0,17.0,'estimativa',[[UN,20]]),
+F('sorvete','Sorvete de creme','Doces',200,3.5,23.0,10.0,'estimativa',[['bola',60]]),
+F('bolo-chocolate','Bolo de chocolate','Doces',380,5.0,55.0,15.0,'estimativa',[[FT,80]]),
+F('acai','Açaí batido com xarope','Doces',190,1.5,30.0,7.0,'estimativa',[['copo 300 ml',300]]),
+
+/* --- Bebidas --- */
+F('cafe','Café sem açúcar','Bebidas',2,0.1,0.3,0,'TACO',[['xícara 50 ml',50]]),
+F('suco-laranja','Suco de laranja natural','Bebidas',45,0.7,10.4,0.2,'TACO',[['copo 200 ml',200]]),
+F('suco-uva-integral','Suco de uva integral','Bebidas',60,0.3,15.0,0.1,'rótulo',[['copo 200 ml',200]]),
+F('agua-de-coco','Água de coco','Bebidas',22,0.3,5.3,0,'TACO',[['copo 200 ml',200]]),
+F('refrigerante','Refrigerante tipo cola','Bebidas',42,0,10.5,0,'rótulo',[['lata 350 ml',350]]),
+F('refrigerante-zero','Refrigerante zero','Bebidas',0.3,0,0.1,0,'rótulo',[['lata 350 ml',350]]),
+F('cerveja','Cerveja pilsen','Bebidas',42,0.3,3.5,0,'estimativa',[['lata 350 ml',350]]),
+F('vinho-tinto','Vinho tinto','Bebidas',82,0.1,2.6,0,'estimativa',[['taça 150 ml',150]]),
+F('caipirinha','Caipirinha','Bebidas',180,0,18.0,0,'estimativa',[['copo',250]]),
+F('destilado','Destilado (vodka, whisky, gin)','Bebidas',231,0,0,0,'estimativa',[['dose 40 ml',40]]),
+
+/* --- Suplementos e itens de marca do plano --- */
+F('whey','Whey protein (Max Titanium Chocolate)','Suplementos',380,80.0,7.0,4.5,'rótulo',[['medidor',15]]),
+F('whey-iso','Whey isolado','Suplementos',370,85.0,3.0,1.5,'rótulo',[['medidor',30]]),
+F('albumina','Albumina','Suplementos',370,80.0,5.0,1.0,'rótulo',[['medidor',10]]),
+F('gel-mombora','Gel Mombora Goiaba','Suplementos',303,0.7,73.3,0,'plano',[['sachê',30]]),
+F('barra-proteica','Barra proteica','Suplementos',350,30.0,35.0,10.0,'rótulo',[[UN,45]]),
+F('barra-cereal','Barra de cereal','Suplementos',380,5.0,70.0,9.0,'rótulo',[[UN,25]]),
+F('livup-estrogonofe','Livup Estrogonofe de frango, arroz e batata assada','Pratos prontos',123,7.7,14.0,4.0,'plano',[['marmita',300]]),
+F('livup-almondega','Livup Almôndega de carne com fusilli','Pratos prontos',141,7.7,20.9,2.9,'plano',[['marmita',325]]),
+F('livup-carne-moida','Livup Carne moída, arroz integral e feijão carioca','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
+F('livup-frango-cremoso','Livup Frango cremoso, arroz, feijão e brócolis','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
+F('livup-escondidinho','Livup Escondidinho de frango com purê de batata-doce','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
+F('livup-hamburguer','Livup Hambúrguer de carne, arroz integral e legumes','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
+
+/* --- Refeições prontas e comida fora --- */
+F('pf-completo','Prato feito (arroz, feijão, carne, salada)','Comida fora',145,9.0,17.0,4.5,'estimativa',[['prato',450]]),
+F('pizza','Pizza de mussarela','Comida fora',270,12.0,30.0,11.0,'estimativa',[[FT,100]]),
+F('hamburguer','Hambúrguer completo (lanche)','Comida fora',250,12.0,22.0,13.0,'estimativa',[[UN,220]]),
+F('sanduiche-natural','Sanduíche natural','Comida fora',200,10.0,25.0,6.0,'estimativa',[[UN,150]]),
+F('wrap-frango','Wrap de frango','Comida fora',200,13.0,22.0,7.0,'estimativa',[[UN,200]]),
+F('sushi','Sushi (niguiri/uramaki)','Comida fora',150,6.0,25.0,3.0,'estimativa',[['peça',25]]),
+F('temaki-salmao','Temaki de salmão','Comida fora',180,9.0,22.0,6.0,'estimativa',[[UN,220]]),
+F('yakisoba','Yakisoba','Comida fora',130,7.0,17.0,3.5,'estimativa',[['prato',400]]),
+F('misso-bowl','Bowl de frango com arroz e legumes','Comida fora',140,10.0,17.0,3.5,'estimativa',[['bowl',400]]),
+F('feijoada','Feijoada','Comida fora',155,10.0,10.0,8.0,'estimativa',[['concha',120]]),
+F('lasanha','Lasanha à bolonhesa','Comida fora',165,9.0,15.0,7.5,'estimativa',[['porção',250]]),
+F('strogonoff','Strogonoff de frango','Comida fora',145,11.0,6.0,9.0,'estimativa',[['concha',120]]),
+F('risoto','Risoto','Comida fora',150,5.0,20.0,5.5,'estimativa',[['prato',300]]),
+F('coxinha','Coxinha','Comida fora',290,8.0,30.0,15.0,'estimativa',[[UN,80]]),
+F('pastel','Pastel de carne frito','Comida fora',350,9.0,32.0,20.0,'estimativa',[[UN,100]]),
+F('esfiha','Esfiha de carne','Comida fora',250,10.0,30.0,10.0,'estimativa',[[UN,80]]),
+F('salgadinho-chips','Salgadinho / batata chips','Comida fora',540,6.0,53.0,34.0,'estimativa',[['pacote 50 g',50]]),
+F('panqueca','Panqueca de carne','Comida fora',220,11.0,20.0,10.0,'estimativa',[[UN,120]]),
+F('tapioca-queijo','Tapioca com queijo','Comida fora',280,8.0,42.0,9.0,'estimativa',[[UN,100]]),
+F('molho-tomate','Molho de tomate','Comida fora',60,1.5,9.0,1.8,'estimativa',[[CS,20]]),
+F('ketchup','Ketchup','Comida fora',110,1.0,26.0,0.2,'rótulo',[[CS,15]]),
+F('shoyu','Molho shoyu','Comida fora',60,6.0,8.0,0.1,'rótulo',[[CS,15]]),
+F('generico-100','Item genérico (ajuste os macros)','Outros',100,5,10,3,'estimativa',[])
+];
+
+/* ==========================================================================
+   B. PLANOS – cada item aponta para um alimento do banco + gramas do PDF
+   ========================================================================== */
+function I(f,g,q,s){ return {f:f,g:g,q:q,s:s||[]}; }
+function OP(id,nome,presc,itens,obs){
+  return {id:id,nome:nome,prescrito:{p:presc[0],c:presc[1],g:presc[2],kcal:presc[3]},itens:itens,obs:obs||''};
+}
+var S_FRUTA='Banana 55 g (1 un. pequena) ou maçã 65 g (1/2 un. média). Também abacaxi 120 g, mamão 120 g, manga 100 g, pera 110 g ou morango 220 g.';
+var S_BERRY='Morango 48 g, amora 24 g ou cereja 21 g.';
+var S_PAO='Pão francês 50 g ou tapioca 40 g (2 col. sopa rasas).';
+var S_VEG='Vegetais são flexíveis: folhas e hortaliças de preferência, molhos calóricos à parte.';
+var S_LIVUP=['Livup Carne moída, arroz integral e feijão carioca 300 g.','Livup Frango cremoso, arroz, feijão e brócolis 300 g.','Livup Escondidinho de frango com purê de batata-doce 300 g.','Livup Hambúrguer de carne, arroz integral e legumes 300 g.'];
+var S_SALADA='Alface, rúcula, repolho, couve ou espinafre; combinar com cenoura, brócolis, abobrinha, chuchu, couve-flor, palmito ou tomate.';
+
+function mCafe(){ return {id:'cafe',nome:'Café da manhã',obs:'',opcoes:[
+  OP('cafe-batavo','Opção 1 – Iogurte (Batavo + leite em pó)',[16.0,49.7,5.9,304],[
+    I('iogurte-batavo-morango-zero',170,'170 g (1 unidade)',['Danone Natural desnatado 160 g – use a variação Danone.']),
+    I('chia',15,'15 g (1 col. sopa cheia)',['Manter 15 g.']),
+    I('salada-de-frutas',70,'70 g (cerca de 1/2 xícara)',[S_FRUTA]),
+    I('aveia',15,'15 g (1 col. sopa cheia)',[]),
+    I('leite-po-desnatado',20,'20 g (2 col. sopa)',['No Batavo, pode ser trocado por whey 15 g (1 medidor).'])]),
+  OP('cafe-danone','Opção 1 – Iogurte (Danone + aveia + whey)',[19.0,47.0,6.9,314],[
+    I('iogurte-natural-desnatado',160,'160 g',[]),
+    I('chia',15,'15 g',[]),
+    I('salada-de-frutas',70,'70 g',[S_FRUTA]),
+    I('aveia',22.5,'22,5 g (1 1/2 col. sopa cheia)',[]),
+    I('whey',7.5,'7,5 g (1/2 medidor)',[])]),
+  OP('cafe-atum','Opção 2 – Pão (atum + pão integral)',[17.2,31.9,7.8,261],[
+    I('atum-oleo',32,'32 g (2 col. sopa cheias)',['Conjunto alternativo: ovos cozidos 100 g + pão francês 50 g + mirtilo 20 g.']),
+    I('creme-ricota-light',30,'30 g (1 1/2 col. sopa)',[]),
+    I('pao-forma-integral',50,'50 g (2 fatias)',[S_PAO]),
+    I('kiwi',76,'76 g (1 unidade média)',['Mirtilo 20 g. '+S_BERRY])]),
+  OP('cafe-ovos','Opção 2 – Pão (ovos + pão francês)',[15.3,32.7,10.0,280],[
+    I('ovo-cozido',100,'100 g (2 unidades médias)',[]),
+    I('pao-frances',50,'50 g (1 unidade)',[]),
+    I('mirtilo',20,'20 g (10 unidades)',[S_BERRY])]),
+  OP('cafe-fora','Opção 3 – Dia de refeições fora',[27.4,19.7,2.8,211],[
+    I('atum-mimi',120,'120 g (1 pote)',['Whey 30 g (2 medidores).']),
+    I('iogurte-batavo-morango-zero',170,'170 g (1 unidade)',[]),
+    I('mirtilo',20,'20 g (10 unidades)',[S_BERRY]),
+    I('banana-prata',40,'40 g (1 un. média do plano)',[])],
+    'Café mais proteico para dias com almoço e jantar fora. Nesse dia, não fazer o lanche da tarde.')
+]};}
+
+function marmitaCasa(g_arroz,g_feijao,comFruta,comLegumes){
+  var its=[ I('frango-grelhado',80,'80 g (cerca de 4 col. sopa)',[]),
+    I('arroz-integral',g_arroz,g_arroz+' g',['Arroz branco '+(g_arroz===110?'90 g':'135-140 g')+', macarrão cozido '+g_arroz+' g, macarrão de arroz '+g_arroz+' g ou quinoa cozida '+(g_arroz===110?'130 g':'190 g')+'.']),
+    I('feijao-preto',g_feijao,g_feijao+' g ('+(g_feijao===80?'1 concha rasa':'2 conchas rasas')+')',['Feijão carioca '+g_feijao+' g, lentilha '+(g_feijao===80?'65-70 g':'130-135 g')+', grão-de-bico '+(g_feijao===80?'40 g':'80 g')+' ou feijão-fradinho '+(g_feijao===80?'70-75 g':'145 g')+'.']) ];
+  if(comFruta) its.push(I('maca',65,'65 g (1/2 unidade média)',[]));
+  if(comLegumes) its.push(I('legumes-cozidos',55,'55 g (1 col. servir cheia)',['Brócolis, cenoura, abobrinha, chuchu, couve-flor, vagem, berinjela ou abóbora.']));
+  its.push(I('salada-folhas',50,'folhas 50 g',[S_SALADA]));
+  its.push(I('hortalicas-cruas',100,'hortaliças até 100 g',['Sem molho calórico.']));
+  return its;
+}
+function mAlmocoMusc(){ return {id:'almoco',nome:'Almoço',obs:'',opcoes:[
+  OP('alm-livup','Livup',[23.1,42.0,12.0,369],[I('livup-estrogonofe',300,'300 g (1 unidade)',S_LIVUP)]),
+  OP('alm-casa','Marmita de casa',[25.5,48.3,10.7,369],marmitaCasa(110,80,true,false))
+]};}
+function mAlmocoCorrida(){ return {id:'almoco',nome:'Almoço',obs:'',opcoes:[
+  OP('alm-corr-casa','Padrão corrida – marmita de casa',[31.3,66.1,11.5,453],marmitaCasa(165,160,false,true)),
+  OP('alm-corr-livup','Padrão corrida – Livup',[25.0,67.9,9.4,458],[I('livup-almondega',325,'325 g (1 unidade)',[])]),
+  OP('alm-fora-casa','Dia de jantar fora – marmita de casa',[25.5,48.3,10.7,369],marmitaCasa(110,80,true,false)),
+  OP('alm-fora-livup','Dia de jantar fora – Livup',[23.1,42.0,12.0,369],[I('livup-estrogonofe',300,'300 g (1 unidade)',S_LIVUP)])
+]};}
+
+function mLanche(comDanone){
+  var ops=[
+    OP('lan-batavo',comDanone?'Opção 1 – Iogurte (Batavo)':'Opção 1 – Iogurte',[16.0,49.7,5.9,304],[
+      I('iogurte-batavo-morango-zero',170,'170 g (1 unidade)',['Iogurte Vigor Grego Zero 90 g.']),
+      I('chia',15,'15 g (1 col. sopa cheia)',[]),
+      I('salada-de-frutas',70,'70 g',['Banana 55 g, maçã 65 g ou uma porção da lista de frutas.']),
+      I('aveia',15,'15 g (1 col. sopa cheia)',[]),
+      I('leite-po-desnatado',20,'20 g (2 col. sopa)',[])])
+  ];
+  if(comDanone) ops.push(OP('lan-danone','Opção 1 – Iogurte (Danone)',[14.9,50.5,6.6,307],[
+    I('iogurte-natural-desnatado',160,'160 g',[]), I('chia',15,'15 g',[]),
+    I('salada-de-frutas',70,'70 g',[]), I('aveia',22.5,'22,5 g (1 1/2 col. sopa cheia)',[])]));
+  ops.push(OP('lan-whey','Opção 2 – Sem iogurte + whey',[16.2,43.8,8.3,296],[
+    I('chia',15,'15 g (1 col. sopa cheia)',[]),
+    I('aveia',15,'15 g (1 col. sopa cheia)',[]),
+    I('banana-prata',55,'55 g (1 un. grande do plano)',['Porção de pão/fibra: pão integral 25 g, tapioca 20 g, bolacha de arroz 15 g (2 un.) ou pipoca sem óleo 18,5 g de grãos.']),
+    I('maca',65,'65 g (1/2 unidade média)',[]),
+    I('whey',15,'15 g (1 medidor)',['Lanche salgado ocasional: 1 porção de pão/fibra + iogurte 140 g, homus 2 col. sopa ou queijo 35-40 g.'])]));
+  return {id:'lanche',nome:'Lanche da tarde',obs:'Não fazer nos dias em que o café escolhido foi "Dia de refeições fora".',opcoes:ops};
+}
+function mJantar(){ return {id:'jantar',nome:'Jantar normal',obs:'Em dias com musculação e corrida, priorizar polvo ou frango Korin.',opcoes:[
+  OP('jan-normal','Jantar normal',[27.8,50.4,11.0,385],[
+    I('frango-grelhado',80,'80 g (cerca de 4 col. sopa)',['Camarão cozido 100 g, polvo cozido 100 g ou frango Korin 110 g.','Tilápia ou truta em porção próxima de 100 g.']),
+    I('pepino',87,'87 g (cerca de 1/2 un. grande)',[S_VEG]),
+    I('tomate-cereja',60,'60 g (6 unidades)',[S_VEG]),
+    I('palmito',30,'30 g (2 col. sopa cheias)',[S_VEG]),
+    I('cenoura',55,'55 g (cerca de 4 col. sopa)',[S_VEG]),
+    I('arroz-integral',110,'110 g (2 col. servir cheias)',['Arroz branco 90 g, macarrão 110 g, macarrão de arroz 110 g, batata inglesa 220 g ou batata-doce 145-150 g.']),
+    I('feijao-preto',80,'80 g (1 concha rasa)',['Feijão carioca 80 g, lentilha 65-70 g, grão-de-bico 40 g, abóbora cabotiá 90 g.'])])
+]};}
+function mCeia(){ return {id:'ceia',nome:'Ceia',obs:'Escolha uma opção nos dias sem refeição livre e com jantar normal.',opcoes:[
+  OP('ceia-1','Opção 1 – Banana + aveia + whey',[16.5,51.8,4.8,310],[
+    I('banana-prata',110,'110 g (2 un. grandes do plano)',['A fruta pode variar em porção equivalente de carboidrato.']),
+    I('psyllium',10,'10 g (1 col. sopa)',[]),
+    I('aveia',30,'30 g (2 col. sopa cheias)',[]),
+    I('whey',15,'15 g (1 medidor)',[])]),
+  OP('ceia-2','Opção 2 – Pão com ricota + iogurte',[17.1,47.6,6.4,310],[
+    I('geleia-diet',20,'20 g (1 col. sopa)',[]),
+    I('creme-ricota-light',30,'30 g (1 1/2 col. sopa)',[]),
+    I('pao-forma-integral',50,'50 g (2 fatias)',[S_PAO]),
+    I('iogurte-grego-zero',90,'90 g (1 unidade)',[]),
+    I('kiwi',76,'76 g (1 unidade média)',['Outra fruta com carboidrato semelhante.']),
+    I('aveia',7,'7 g (1/2 col. sopa)',[])]),
+  OP('ceia-3','Opção 3 – Tapioca com queijo',[12.6,51.3,5.9,308],[
+    I('goma-tapioca',60,'60 g (4 col. sopa rasas)',['Pão francês 50 g.']),
+    I('queijo-minas',30,'30 g (1 fatia média)',[]),
+    I('iogurte-grego-zero',90,'90 g (1 unidade)',[]),
+    I('mirtilo',20,'20 g (10 unidades)',[S_BERRY])])
+]};}
+function mJantarCal(){ return {id:'jantar-calorico',nome:'Jantar calórico (sem ceia)',alternativa:true,
+  obs:'Usar no lugar de jantar normal + ceia. Gordura total em torno de 16 g (faixa 15-17 g). Sugestões do plano para comer fora: Strogo Crush (Wrappd by Sofy) + 200 ml de suco de laranja; Saint Peter ou frango Korin com arroz, legumes e adicional de batata-doce; Missô Bowl com frango crispy + 2 abacaxi e 1 fusilli (37 g de carbo); salada Olga Ri com 2 fusilli + 2 abacaxi + 2 abóbora (60 g de carbo) + frango, montagem de referência 419 kcal.',
+  opcoes:[ OP('jc-1','Montagem padrão',[44.3,102.2,15.8,695],[
+    I('frango-grelhado',120,'120 g (5-6 col. sopa em cubos)',['Polvo 120 g, tilápia/truta 140-145 g ou camarão 180-190 g.','Com salmão, reduzir ou retirar o azeite.']),
+    I('arroz-integral',220,'220 g (4 col. servir cheias)',['Arroz branco 180-185 g, macarrão 220 g ou batata-doce 290-300 g.']),
+    I('feijao-preto',160,'160 g (2 conchas rasas)',['Feijão carioca 160 g, lentilha 130-135 g, grão-de-bico 80 g ou feijão-fradinho 145 g.']),
+    I('legumes-cozidos',150,'150 g (1 1/2 xícara)',[]),
+    I('salada-folhas',125,'100-150 g',[]),
+    I('banana-prata',55,'55 g (1 unidade)',['Maçã 100 g, manga 100 g, pera 110 g ou kiwi 130 g.']),
+    I('azeite',5,'5 g (1 col. chá)',['Avocado 50 g ou castanhas 10 g.'])]) ]};}
+function mPre(){ return {id:'pre-treino',nome:'Pré-treino',obs:'Idealmente 1 hora antes da corrida.',opcoes:[
+  OP('pre-1','Opção 1 – Pão + banana + doce de leite',[6.0,45.2,3.3,231],[
+    I('pao-forma',25,'25 g (1 fatia)',[]), I('banana-prata',40,'40 g (1 un. média do plano)',[]), I('doce-de-leite',40,'40 g (1 col. sopa cheia)',[])]),
+  OP('pre-2','Opção 2 – Tapioca + doce de leite',[1.7,52.4,1.6,230],[
+    I('goma-tapioca',52.5,'52,5 g (3 1/2 col. sopa rasas)',[]), I('doce-de-leite',25,'25 g (1 col. sobremesa cheia)',[])]),
+  OP('pre-3','Opção 3 – Banana com chocolate e mel',[5.7,50.2,1.1,225],[
+    I('banana-prata',80,'80 g (2 un. médias do plano)',[]), I('chocolate-po',30,'30 g (3 col. sopa rasas)',[]), I('mel',9,'9 g (1 col. sobremesa rasa)',[])])
+]};}
+function mIntra(curto){
+  var obs = curto
+    ? 'Consumir após 20 minutos. Hidratação: 100 ml 15 min antes; depois 100 ml nos km 3, 6 e 9.'
+    : 'Consumir metade aos 20 min e metade aos 50 min. Hidratação: 100 ml 15 min antes; depois 100 ml nos km 3, 6, 9, 12 e 15.';
+  return {id:'intra-treino',nome:'Intra-treino',obs:obs,opcoes: curto ? [
+    OP('intra-1','Goiabada + damasco',[0.4,20.4,0.1,80],[
+      I('goiabada',25,'25 g (1/2 fatia)',['Bananinha Santa Branca Zero 35 g (1 unidade).']), I('damasco-seco',7,'7 g (1 unidade)',[])]),
+    OP('intra-2','Gel Mombora Goiaba',[0.2,22.0,0.0,91],[I('gel-mombora',30,'30 g (1 unidade)',[])])
+  ] : [
+    OP('intra-1','Goiabada + damasco',[0.7,40.8,0.1,160],[
+      I('goiabada',50,'50 g (1 fatia)',['Bananinha Santa Branca Zero 70 g (2 unidades).']), I('damasco-seco',14,'14 g (2 unidades)',[])]),
+    OP('intra-2','Gel Mombora Goiaba',[0.4,44.0,0.0,182],[I('gel-mombora',60,'60 g (2 unidades)',[])])
+  ]};
+}
+
+function basePadrao(){
+  return { versao:3, config:{ agua:2500, baseMeta:'prescricao' }, alimentosCustom:[], planos:[
+    { id:'1.1', nome:'Musculação', curto:'Musc.', subtitulo:'Plano 1.1 – dia de musculação',
+      referencia:{p:98.5,c:240.5,g:41.7,kcal:1679}, refFonte:'impressa no PDF',
+      refeicoes:[ mCafe(), mAlmocoMusc(), mLanche(true), mJantar(), mCeia(), mJantarCal() ] },
+    { id:'1.2', nome:'Corrida 11-12 km', curto:'11-12 km', subtitulo:'Plano 1.2 – corrida intermediária',
+      referencia:{p:114.0,c:333.3,g:42.5,kcal:2067}, refFonte:'recalculada (o PDF imprime 1.838 kcal, que não fecha com as opções)',
+      refeicoes:[ mPre(), mIntra(true), mCafe(), mAlmocoCorrida(), mLanche(false), mJantar(), mCeia(), mJantarCal() ] },
+    { id:'1.3', nome:'Corrida 16-17 km', curto:'16-17 km', subtitulo:'Plano 1.3 – corrida longa',
+      referencia:{p:110.4,c:353.4,g:43.6,kcal:2144}, refFonte:'impressa no PDF',
+      refeicoes:[ mPre(), mIntra(false), mCafe(), mAlmocoCorrida(), mLanche(false), mJantar(), mCeia(), mJantarCal() ] }
+  ]};
+}
+
+/* ==========================================================================
+   C. Estado e utilidades
+   ========================================================================== */
+var S={ tab:'registro', base:null, dateKey:todayKey(), day:null, hist:[], backend:'local', db:null,
+        unsubDay:null, unsubBase:null, planoView:'1.1', selOpt:{}, pick:null, busca:{q:'',cat:'Todos',meal:null} };
+
+function todayKey(d){ d=d||new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function keyToDate(k){ var p=k.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
+function shiftKey(k,n){ var d=keyToDate(k); d.setDate(d.getDate()+n); return todayKey(d); }
+function fmtDayLong(k){ var t=todayKey();
+  if(k===t)return'Hoje'; if(k===shiftKey(t,-1))return'Ontem'; if(k===shiftKey(t,1))return'Amanhã';
+  return keyToDate(k).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}); }
+function fmtWeekday(k){ return keyToDate(k).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}); }
+function n(v){ v=Number(v); return isFinite(v)?v:0; }
+function r0(v){ return Math.round(n(v)); }
+function r1(v){ return Math.round(n(v)*10)/10; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function nowTime(){ var d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function norm(s){ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+
+function alimentos(){
+  var extra=(S.base&&S.base.alimentosCustom)||[];
+  var map={}; ALIM_BASE.forEach(function(a){ map[a.id]=a; });
+  extra.forEach(function(a){ map[a.id]=a; });
+  return Object.keys(map).map(function(k){ return map[k]; });
+}
+function alim(id){ var a=alimentos().filter(function(x){return x.id===id;}); return a[0]||null; }
+function macrosDe(id,gramas){
+  var a=alim(id); if(!a) return {kcal:0,p:0,c:0,g:0};
+  var f=n(gramas)/100;
+  return {kcal:a.kcal*f, p:a.p*f, c:a.c*f, g:a.g*f};
+}
+function somaMacros(list){ var t={kcal:0,p:0,c:0,g:0};
+  list.forEach(function(m){ t.kcal+=n(m.kcal); t.p+=n(m.p); t.c+=n(m.c); t.g+=n(m.g); }); return t; }
+function calcOpcao(op){ return somaMacros((op.itens||[]).map(function(i){ return macrosDe(i.f,i.g); })); }
+
+function planos(){ return (S.base&&S.base.planos)||[]; }
+function planoById(id){ var a=planos().filter(function(p){return p.id===id;}); return a[0]||planos()[0]; }
+function dayPlanoId(){ if(S.day&&S.day.planoId) return S.day.planoId;
+  try{ var l=localStorage.getItem('nutri.lastPlano'); if(l) return l; }catch(e){} return '1.1'; }
+function planoDoDia(){ return planoById(dayPlanoId()); }
+function somaPadrao(plano,modo){
+  var t={kcal:0,p:0,c:0,g:0};
+  (plano.refeicoes||[]).forEach(function(m){ if(m.alternativa) return;
+    var o=(m.opcoes||[])[0]; if(!o) return;
+    var v = modo==='banco' ? calcOpcao(o) : o.prescrito;
+    t.kcal+=n(v.kcal); t.p+=n(v.p); t.c+=n(v.c); t.g+=n(v.g); });
+  return t;
+}
+function metas(){
+  var p=planoDoDia(), cfg=(S.base&&S.base.config)||{};
+  var base = cfg.baseMeta==='banco' ? somaPadrao(p,'banco') : p.referencia;
+  return { kcal:n(base.kcal), p:n(base.p), c:n(base.c), g:n(base.g), agua:n(cfg.agua)||2500 };
+}
+function dayTotals(day){ return somaMacros(((day&&day.registros)||[])); }
+function emptyDay(k){ return {data:k,planoId:dayPlanoId(),registros:[],agua:0,peso:null}; }
+
+/* ==========================================================================
+   D. Persistência
+   ========================================================================== */
+var LS_BASE='nutri3.base', LS_DAY='nutri3.day.';
+function lsGet(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+var Store={
+  async init(){
+    try{ if(window.claude&&typeof window.claude.use==='function') S.db=await window.claude.use('db'); }catch(e){ S.db=null; }
+    S.backend=S.db?'db':'local';
+  },
+  watchBase(cb){
+    if(S.db){ try{ return S.db.doc('plano/base3').onSnapshot(function(s){ cb(s.exists?s.data():null); },function(){ cb(lsGet(LS_BASE)); }); }
+      catch(e){ cb(lsGet(LS_BASE)); return function(){}; } }
+    cb(lsGet(LS_BASE)); return function(){};
+  },
+  async saveBase(b){ lsSet(LS_BASE,b);
+    if(S.db){ try{ await S.db.doc('plano/base3').set(b); }catch(e){ toast('Falha ao salvar na nuvem.'); } }
+    else { S.base=b; render(); } },
+  watchDay(key,cb){
+    if(S.db){ try{ return S.db.doc('dias3/'+key).onSnapshot(function(s){ cb(s.exists?s.data():null); },function(){ cb(lsGet(LS_DAY+key)); }); }
+      catch(e){ cb(lsGet(LS_DAY+key)); return function(){}; } }
+    cb(lsGet(LS_DAY+key)); return function(){};
+  },
+  async saveDay(d){ lsSet(LS_DAY+d.data,d);
+    try{ localStorage.setItem('nutri.lastPlano',d.planoId||'1.1'); }catch(e){}
+    if(S.db){ try{ await S.db.doc('dias3/'+d.data).set(d); }catch(e){ toast('Falha ao salvar na nuvem.'); } }
+    else { S.day=d; render(); } },
+  async allDays(limit){
+    if(S.db){ try{ var s=await S.db.collection('dias3').orderBy('data','desc').limit(limit||30).get();
+      return s.docs.map(function(d){ return d.data(); }); }catch(e){} }
+    var out=[]; try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
+      if(k&&k.indexOf(LS_DAY)===0){ var v=lsGet(k); if(v) out.push(v); } } }catch(e){}
+    out.sort(function(a,b){ return a.data<b.data?1:-1; });
+    return out.slice(0,limit||30);
+  }
+};
+
+/* ==========================================================================
+   E. Ações
+   ========================================================================== */
+function subscribeDay(){
+  if(S.unsubDay){ try{ S.unsubDay(); }catch(e){} }
+  var key=S.dateKey; S.day=null;
+  S.unsubDay=Store.watchDay(key,function(d){ if(key!==S.dateKey) return;
+    S.day=(d&&d.data)?d:emptyDay(key); render(); });
+}
+function setDate(k){ S.dateKey=k; subscribeDay(); render(); }
+function curDay(){ return S.day?JSON.parse(JSON.stringify(S.day)):emptyDay(S.dateKey); }
+async function commit(d){ d.data=S.dateKey; S.day=d; render(); await Store.saveDay(d); }
+async function setPlano(id){ var d=curDay(); d.planoId=id; await commit(d); }
+async function addRows(rows){ var d=curDay(); d.registros=(d.registros||[]).concat(rows); await commit(d); }
+async function removeRow(id){ var d=curDay(); d.registros=(d.registros||[]).filter(function(x){return x.id!==id;}); await commit(d); }
+async function clearMeal(mid){ var d=curDay(); d.registros=(d.registros||[]).filter(function(x){return x.refeicaoId!==mid;}); await commit(d); }
+async function addWater(ml){ var d=curDay(); d.agua=Math.max(0,n(d.agua)+ml); await commit(d); }
+async function setPeso(v){ var d=curDay(); d.peso=v===''?null:n(v); S.day=d; await Store.saveDay(d); }
+
+function novoRegistro(alimentoId,gramas,medidaTxt,refeicaoId,refeicaoNome,hora){
+  var a=alim(alimentoId), m=macrosDe(alimentoId,gramas);
+  return { id:uid(), refeicaoId:refeicaoId, refeicaoNome:refeicaoNome,
+    alimentoId:alimentoId, nome:a?a.nome:'Item', qtd:n(gramas), medida:medidaTxt||'',
+    kcal:r1(m.kcal), p:r1(m.p), c:r1(m.c), g:r1(m.g), hora:hora||nowTime(), fonte:a?a.fonte:'' };
+}
+
+/* ==========================================================================
+   F. Render
+   ========================================================================== */
+function render(){
+  document.getElementById('subTitle').textContent =
+    S.tab==='planos' ? 'planos e substituições' : (planoDoDia()? planoDoDia().subtitulo : 'registro');
+  var v=document.getElementById('view');
+  v.innerHTML = S.tab==='planos' ? viewPlanos() : viewRegistro();
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(t){
+    t.setAttribute('aria-selected',t.dataset.tab===S.tab?'true':'false'); });
+}
+function barHTML(val,target){
+  var pct=target>0?Math.min(100,(val/target)*100):0, over=target>0&&val>target*1.05;
+  return '<div class="bar '+(over?'over':'')+'"><i style="width:'+pct.toFixed(1)+'%"></i></div>';
+}
+function macroBox(cls,label,val,target){
+  return '<div class="macro '+cls+'"><div class="lbl">'+label+'</div>'
+   +'<div class="val">'+r0(val)+'<small> / '+r0(target)+' g</small></div>'+barHTML(val,target)+'</div>';
+}
+
+/* ---------- ABA REGISTRO ---------- */
+function viewRegistro(){
+  var plano=planoDoDia(), m=metas(), t=dayTotals(S.day);
+  var regs=(S.day&&S.day.registros)||[];
+  var h='';
+  h+='<div class="day-nav"><button class="icon-btn" data-act="prevDay">‹</button>'
+   +'<div class="d-label">'+esc(fmtDayLong(S.dateKey))+'<small>'+esc(fmtWeekday(S.dateKey))+'</small></div>'
+   +'<button class="icon-btn" data-act="nextDay">›</button></div>';
+
+  h+='<div class="plan-chips">';
+  planos().forEach(function(p){
+    h+='<button class="plan-chip" aria-pressed="'+(p.id===plano.id)+'" data-act="setPlano" data-id="'+esc(p.id)+'">'
+      +'<b>'+esc(p.curto)+'</b><span>'+r0(p.referencia.kcal)+' kcal</span></button>'; });
+  h+='</div>';
+
+  var rest=m.kcal-t.kcal;
+  h+='<div class="card"><div class="kcal-box">'
+   +'<div class="kcal-big">'+r0(t.kcal)+' <span>/ '+r0(m.kcal)+' kcal</span></div>'
+   +'<div class="kcal-sub">'+(rest>=0?'faltam '+r0(rest)+' kcal':r0(-rest)+' kcal acima da meta')+'</div>'
+   +barHTML(t.kcal,m.kcal)+'</div><div class="macros">'
+   +macroBox('p','Proteína',t.p,m.p)+macroBox('c','Carboidrato',t.c,m.c)+macroBox('g','Gordura',t.g,m.g)
+   +'</div></div>';
+
+  var meals=(plano.refeicoes||[]).map(function(r){ return {id:r.id,nome:r.nome,plan:r}; });
+  meals.push({id:'livre',nome:'Refeição livre / extras',plan:null});
+
+  h+='<div class="sec-title"><h2>Refeições de '+esc(fmtDayLong(S.dateKey).toLowerCase())+'</h2><span class="hint">'+regs.length+' item(ns)</span></div>';
+  h+='<div class="card">';
+  meals.forEach(function(mm){
+    var rows=regs.filter(function(x){ return x.refeicaoId===mm.id; });
+    var tt=somaMacros(rows);
+    h+='<div class="rmeal"><div class="rmeal-head"><b>'+esc(mm.nome)+(mm.plan&&mm.plan.alternativa?'<span class="tag">alternativa</span>':'')+'</b>'
+     +'<span class="k">'+(rows.length? r0(tt.kcal)+' kcal · P'+r1(tt.p)+' C'+r1(tt.c)+' G'+r1(tt.g) : '–')+'</span></div>';
+    if(rows.length){
+      h+='<ul class="rows">';
+      rows.forEach(function(r){
+        h+='<li><span class="nm">'+esc(r.nome)+'<small>'+r1(r.qtd)+' g'+(r.medida?' · '+esc(r.medida):'')
+         +' · P'+r1(r.p)+' C'+r1(r.c)+' G'+r1(r.g)+'</small></span>'
+         +'<span class="kc">'+r0(r.kcal)+'</span><button class="x" data-act="delRow" data-id="'+esc(r.id)+'">×</button></li>';
+      });
+      h+='</ul>';
+    }
+    h+='<div class="acts">'
+     +'<button class="mini pri" data-act="buscar" data-meal="'+esc(mm.id)+'">+ alimento</button>'
+     +(mm.plan?'<button class="mini" data-act="opcaoPlano" data-meal="'+esc(mm.id)+'">+ opção do plano</button>':'')
+     +(rows.length?'<button class="mini" data-act="limparRef" data-meal="'+esc(mm.id)+'">limpar</button>':'')
+     +'</div></div>';
+  });
+  h+='</div>';
+
+  var agua=n(S.day&&S.day.agua);
+  h+='<div class="sec-title"><h2>Água e peso</h2></div>';
+  h+='<div class="card"><div class="water"><div class="wv">'+(agua/1000).toFixed(2).replace('.',',')
+   +' <small>/ '+(m.agua/1000).toFixed(1).replace('.',',')+' L</small>'+barHTML(agua,m.agua)+'</div><div class="grow"></div>'
+   +'<button class="mini" data-act="water" data-ml="250">+250</button>'
+   +'<button class="mini" data-act="water" data-ml="500">+500</button>'
+   +'<button class="mini" data-act="water" data-ml="-250">−250</button></div>'
+   +'<div class="field"><label>Peso do dia (kg)</label><input class="inp" type="number" step="0.1" inputmode="decimal" placeholder="opcional" value="'+(S.day&&S.day.peso!=null?S.day.peso:'')+'" data-act="peso"></div></div>';
+
+  h+=histHTML();
+  return h;
+}
+
+function histHTML(){
+  var keys=[]; for(var i=6;i>=0;i--) keys.push(shiftKey(todayKey(),-i));
+  var byKey={}; S.hist.forEach(function(d){ byKey[d.data]=d; });
+  var rows=keys.map(function(k){ var d=byKey[k]||{data:k,registros:[]};
+    var p=planoById(d.planoId||'1.1');
+    return {k:k,d:d,t:dayTotals(d),meta:n(p.referencia.kcal),plano:p}; });
+  var max=1; rows.forEach(function(r){ max=Math.max(max,r.t.kcal,r.meta); });
+  var h='<div class="sec-title"><h2>Últimos 7 dias</h2><span class="hint">kcal por dia</span></div><div class="card"><div class="chart">';
+  rows.forEach(function(r){
+    var pct=(r.t.kcal/max)*100, over=r.meta&&r.t.kcal>r.meta*1.05;
+    h+='<div class="col"><div class="stack '+(over?'over':'')+'"><i style="height:'+pct.toFixed(1)+'%"></i></div>'
+     +'<div class="cl">'+keyToDate(r.k).toLocaleDateString('pt-BR',{weekday:'short'}).slice(0,3)+'</div></div>'; });
+  h+='</div>';
+  rows.slice().reverse().forEach(function(r){
+    h+='<div class="hist-row"><div class="hd"><b>'+esc(fmtDayLong(r.k))+'</b><small>'+esc(r.plano.curto)+' · '
+     +((r.d.registros||[]).length)+' item(ns) · P'+r1(r.t.p)+' C'+r1(r.t.c)+' G'+r1(r.t.g)
+     +(r.d.peso!=null?' · '+r.d.peso+' kg':'')+'</small></div>'
+     +'<div style="font-weight:600;font-size:13px;white-space:nowrap">'+r0(r.t.kcal)
+     +'<span style="color:var(--muted);font-weight:500">/'+r0(r.meta)+'</span></div></div>'; });
+  h+='</div>';
+  return h;
+}
+
+/* ---------- ABA PLANOS ---------- */
+function viewPlanos(){
+  var plano=planoById(S.planoView);
+  var h='<div class="plan-chips" style="margin-top:14px">';
+  planos().forEach(function(p){
+    h+='<button class="plan-chip" aria-pressed="'+(p.id===plano.id)+'" data-act="viewPlano" data-id="'+esc(p.id)+'">'
+      +'<b>'+esc(p.curto)+'</b><span>'+esc(p.nome)+'</span></button>'; });
+  h+='</div>';
+
+  var ref=plano.referencia;
+  h+='<div class="card"><div class="field"><label>Meta diária do plano</label>'
+   +'<div style="font-size:15px"><b>'+r0(ref.kcal)+' kcal</b> · P '+r1(ref.p)+' · C '+r1(ref.c)+' · G '+r1(ref.g)+' g</div>'
+   +'</div></div>';
+
+  (plano.refeicoes||[]).forEach(function(ref2){
+    var key=plano.id+'|'+ref2.id, sel=n(S.selOpt[key])||0;
+    var o=(ref2.opcoes||[])[sel]||{itens:[],prescrito:{}};
+    h+='<div class="card" style="margin-top:12px"><div class="meal"><div class="meal-head"><span class="meal-name">'+esc(ref2.nome)
+     +(ref2.alternativa?'<span class="tag">alternativa</span>':'')+'</span>'
+     +'<span class="meal-kcal">'+r0(o.prescrito.kcal)+' kcal</span></div>';
+    if((ref2.opcoes||[]).length>1){
+      h+='<div class="pill-row">';
+      ref2.opcoes.forEach(function(oo,i){
+        h+='<button class="pill" aria-pressed="'+(i===sel)+'" data-act="selOpt" data-key="'+esc(key)+'" data-i="'+i+'">'+esc(oo.nome)+'</button>'; });
+      h+='</div>';
+    }
+    h+='<ul class="items">';
+    (o.itens||[]).forEach(function(i2){
+      var a=alim(i2.f);
+      h+='<li><div class="nm"><span class="a">'+esc(a?a.nome:i2.f)+'</span><span class="qtd">'+esc(i2.q)+'</span></div>'
+       +((i2.s&&i2.s.length)?'<details class="subs"><summary>substituições</summary><ul>'
+          +i2.s.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></details>':'')+'</li>';
+    });
+    h+='</ul><div class="mtot"><span><b>'+r0(o.prescrito.kcal)+' kcal</b> · P '+r1(o.prescrito.p)+' · C '+r1(o.prescrito.c)+' · G '+r1(o.prescrito.g)+' g</span></div>';
+    if(o.obs) h+='<div class="obs">'+esc(o.obs)+'</div>';
+    if(ref2.obs) h+='<div class="obs">'+esc(ref2.obs)+'</div>';
+    h+='<div class="acts" style="padding-left:0;padding-bottom:0"><button class="mini pri" data-act="regOpcao" data-plano="'+esc(plano.id)+'" data-meal="'+esc(ref2.id)+'" data-i="'+sel+'">registrar hoje</button></div>';
+    h+='</div></div>';
+  });
+  return h;
+}
+
+/* ==========================================================================
+   G. Sheets
+   ========================================================================== */
+function closeSheet(){ document.getElementById('sheetHost').innerHTML=''; S.pick=null; }
+function sheet(title,body,foot){
+  return '<div class="sheet-bg" data-act="closeBg"><div class="sheet">'
+    +'<div class="sheet-head"><h3>'+title+'</h3><button class="icon-btn" data-act="close">×</button></div>'
+    +'<div class="sheet-body">'+body+'</div>'
+    +'<div class="sheet-foot">'+foot+'</div></div></div>';
+}
+function mealNome(id){
+  if(id==='livre') return 'Refeição livre / extras';
+  var r=(planoDoDia().refeicoes||[]).filter(function(x){return x.id===id;})[0];
+  return r?r.nome:'Refeição';
+}
+
+/* --- busca de alimentos --- */
+function openBusca(mealId){
+  S.busca={q:'',cat:'Todos',meal:mealId};
+  document.getElementById('sheetHost').innerHTML = sheet(
+    esc(mealNome(mealId)),
+    '<input class="inp" id="qBusca" placeholder="buscar alimento…" autocomplete="off">'
+    +'<div class="cats" id="catRow"></div><ul class="flist" id="fList"></ul>',
+    '<div class="tot">Toque em um alimento para informar a quantidade.</div>'
+    +'<button class="btn ghost" data-act="novoAlimento">Criar alimento</button>');
+  renderBusca();
+  var el=document.getElementById('qBusca');
+  el.addEventListener('input',function(){ S.busca.q=el.value; renderBusca(); });
+  setTimeout(function(){ el.focus(); },50);
+}
+function renderBusca(){
+  var cats=['Todos']; alimentos().forEach(function(a){ if(cats.indexOf(a.cat)<0) cats.push(a.cat); });
+  document.getElementById('catRow').innerHTML = cats.map(function(c){
+    return '<button class="pill" aria-pressed="'+(c===S.busca.cat)+'" data-act="cat" data-c="'+esc(c)+'">'+esc(c)+'</button>'; }).join('');
+  var q=norm(S.busca.q);
+  var list=alimentos().filter(function(a){
+    if(S.busca.cat!=='Todos'&&a.cat!==S.busca.cat) return false;
+    return !q || norm(a.nome).indexOf(q)>=0;
+  }).sort(function(a,b){ return a.nome.localeCompare(b.nome,'pt-BR'); }).slice(0,80);
+  document.getElementById('fList').innerHTML = list.length ? list.map(function(a){
+    return '<li data-act="pick" data-id="'+esc(a.id)+'"><span class="fn">'+esc(a.nome)
+      +'<small>'+esc(a.cat)+'</small></span>'
+      +'<span class="fk">'+r0(a.kcal)+' kcal/100 g</span></li>'; }).join('')
+    : '<li style="cursor:default"><span class="fn">Nada encontrado. Use “Criar alimento”.</span></li>';
+}
+function openQtd(alimentoId){
+  var a=alim(alimentoId); if(!a) return;
+  var meds=[['gramas (g)',1]].concat(a.med.map(function(m){ return [m[0],m[1]]; }));
+  var defQtd = a.med.length ? 1 : 100;
+  var body='<div style="font-family:Fraunces,serif;font-size:17px">'+esc(a.nome)+'</div>'
+   +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">por 100 g: '+r0(a.kcal)+' kcal · P '+r1(a.p)+' · C '+r1(a.c)+' · G '+r1(a.g)+'</div>'
+   +'<div class="grid2"><div><label style="font-size:11px;color:var(--muted);font-weight:700">Quantidade</label>'
+   +'<input class="inp qq" id="qVal" type="number" step="0.1" inputmode="decimal" value="'+defQtd+'"></div>'
+   +'<div><label style="font-size:11px;color:var(--muted);font-weight:700">Medida</label>'
+   +'<select class="inp qq" id="qMed">'+meds.map(function(m,i){ return '<option value="'+m[1]+'" data-lbl="'+esc(m[0])+'"'+(i===(a.med.length?1:0)?' selected':'')+'>'+esc(m[0])+'</option>'; }).join('')+'</select></div></div>'
+   +'<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Refeição</label>'
+   +'<select class="inp" id="qMeal">'+mealOptionsHTML(S.busca.meal)+'</select></div>'
+   +'<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Horário</label>'
+   +'<input class="inp" id="qHora" type="time" value="'+nowTime()+'"></div>';
+  document.getElementById('sheetHost').innerHTML = sheet('Quantidade', body,
+    '<div class="tot" id="qTot"></div><button class="btn" data-act="addQtd" data-id="'+esc(a.id)+'">Adicionar</button>');
+  updQtd();
+  ['qVal','qMed'].forEach(function(id){ document.getElementById(id).addEventListener('input',updQtd);
+    document.getElementById(id).addEventListener('change',updQtd); });
+}
+function mealOptionsHTML(sel){
+  var out=(planoDoDia().refeicoes||[]).map(function(r){
+    return '<option value="'+esc(r.id)+'"'+(r.id===sel?' selected':'')+'>'+esc(r.nome)+'</option>'; });
+  out.push('<option value="livre"'+(sel==='livre'?' selected':'')+'>Refeição livre / extras</option>');
+  return out.join('');
+}
+function qtdGramas(){
+  var v=n(document.getElementById('qVal').value);
+  var sel=document.getElementById('qMed');
+  return v*n(sel.value);
+}
+function updQtd(){
+  var host=document.getElementById('qTot'); if(!host) return;
+  var id=document.querySelector('[data-act="addQtd"]').dataset.id;
+  var m=macrosDe(id,qtdGramas());
+  host.innerHTML='<b>'+r0(m.kcal)+' kcal</b> · '+r1(qtdGramas())+' g<br>P '+r1(m.p)+' · C '+r1(m.c)+' · G '+r1(m.g);
+}
+
+/* --- registrar opção do plano --- */
+function openOpcaoPlano(mealId,forcePlanoId,forceIdx){
+  var plano = forcePlanoId ? planoById(forcePlanoId) : planoDoDia();
+  var ref=(plano.refeicoes||[]).filter(function(x){return x.id===mealId;})[0]; if(!ref) return;
+  var sel = forceIdx!=null ? forceIdx : (n(S.selOpt[plano.id+'|'+ref.id])||0);
+  var o=(ref.opcoes||[])[sel]||{itens:[]};
+  var body='';
+  if((ref.opcoes||[]).length>1){
+    body+='<div class="pill-row" style="margin-top:0">'+ref.opcoes.map(function(oo,i){
+      return '<button class="pill" aria-pressed="'+(i===sel)+'" data-act="opPlanoSel" data-meal="'+esc(ref.id)+'" data-i="'+i+'">'+esc(oo.nome)+'</button>'; }).join('')+'</div>';
+  }
+  body+='<div style="font-size:11.5px;color:var(--muted);margin:10px 0 4px">Desmarque o que não comeu e ajuste as gramas.</div>';
+  (o.itens||[]).forEach(function(i2,idx){
+    var a=alim(i2.f);
+    body+='<div style="display:flex;gap:9px;align-items:center;padding:7px 0;border-top:1px solid var(--line)">'
+     +'<input type="checkbox" class="opChk" data-i="'+idx+'" checked style="width:18px;height:18px;accent-color:var(--accent)">'
+     +'<div style="flex:1;min-width:0"><div style="font-size:13.5px">'+esc(a?a.nome:i2.f)+'</div>'
+     +'<div style="font-size:11px;color:var(--muted)">'+esc(i2.q)+'</div></div>'
+     +'<input class="inp opG" data-i="'+idx+'" type="number" step="0.5" value="'+i2.g+'" style="width:78px;text-align:right;padding:6px 8px">'
+     +'<span style="font-size:11px;color:var(--muted)">g</span></div>';
+  });
+  body+='<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Horário</label>'
+   +'<input class="inp" id="opHora" type="time" value="'+nowTime()+'"></div>';
+  document.getElementById('sheetHost').innerHTML = sheet(esc(ref.nome), body,
+    '<div class="tot" id="opTot"></div><button class="btn" data-act="addOpcao" data-meal="'+esc(ref.id)+'" data-plano="'+esc(plano.id)+'" data-i="'+sel+'">Adicionar</button>');
+  updOpTot();
+}
+function opSelecao(){
+  var host=document.getElementById('sheetHost');
+  var btn=host.querySelector('[data-act="addOpcao"]'); if(!btn) return [];
+  var plano=planoById(btn.dataset.plano);
+  var ref=(plano.refeicoes||[]).filter(function(x){return x.id===btn.dataset.meal;})[0];
+  var o=(ref.opcoes||[])[+btn.dataset.i]||{itens:[]};
+  var out=[];
+  Array.prototype.forEach.call(host.querySelectorAll('.opChk'),function(cb){
+    if(!cb.checked) return;
+    var i=+cb.dataset.i, item=(o.itens||[])[i]; if(!item) return;
+    var gi=host.querySelector('.opG[data-i="'+i+'"]');
+    out.push({f:item.f, g:gi?n(gi.value):item.g});
+  });
+  return out;
+}
+function updOpTot(){
+  var el=document.getElementById('opTot'); if(!el) return;
+  var t=somaMacros(opSelecao().map(function(x){ return macrosDe(x.f,x.g); }));
+  el.innerHTML='<b>'+r0(t.kcal)+' kcal</b><br>P '+r1(t.p)+' · C '+r1(t.c)+' · G '+r1(t.g);
+}
+
+/* --- criar alimento --- */
+function openNovoAlimento(){
+  var body='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Informe os valores <b>por 100 g</b> (ou por porção, ajustando a quantidade depois).</div>'
+   +'<label style="font-size:11px;color:var(--muted);font-weight:700">Nome</label><input class="inp" id="naNome" placeholder="ex.: Marmita do restaurante X">'
+   +'<div class="grid4" style="margin-top:10px">'
+   +'<div><input class="inp" id="naKcal" type="number" placeholder="0"><div style="font-size:10px;color:var(--muted);text-align:center">kcal</div></div>'
+   +'<div><input class="inp" id="naP" type="number" placeholder="0"><div style="font-size:10px;color:var(--muted);text-align:center">prot</div></div>'
+   +'<div><input class="inp" id="naC" type="number" placeholder="0"><div style="font-size:10px;color:var(--muted);text-align:center">carb</div></div>'
+   +'<div><input class="inp" id="naG" type="number" placeholder="0"><div style="font-size:10px;color:var(--muted);text-align:center">gord</div></div></div>'
+   +'<div style="margin-top:10px"><label style="font-size:11px;color:var(--muted);font-weight:700">Categoria</label>'
+   +'<input class="inp" id="naCat" value="Meus alimentos"></div>';
+  document.getElementById('sheetHost').innerHTML = sheet('Novo alimento', body,
+    '<div class="tot">Fica salvo no seu banco.</div><button class="btn" data-act="salvarAlimento">Salvar</button>');
+}
+
+/* --- ajustes --- */
+function openAjustes(){
+  var cfg=(S.base&&S.base.config)||{};
+  var body='<label style="font-size:11px;color:var(--muted);font-weight:700">Meta de água (ml/dia)</label>'
+   +'<input class="inp" id="cfgAgua" type="number" value="'+(n(cfg.agua)||2500)+'">'
+   +'<div style="margin-top:14px"><label style="font-size:11px;color:var(--muted);font-weight:700">Base da meta diária</label>'
+   +'<select class="inp" id="cfgBase">'
+   +'<option value="prescricao"'+(cfg.baseMeta!=='banco'?' selected':'')+'>Prescrição (macros impressos no PDF)</option>'
+   +'<option value="banco"'+(cfg.baseMeta==='banco'?' selected':'')+'>Banco de alimentos (soma das 1ªs opções)</option>'
+   +'</select>'
+   +'<div style="font-size:11.5px;color:var(--muted);margin-top:6px">A prescrição é o alvo do nutricionista. O banco deixa meta e registro na mesma base de cálculo, evitando viés sistemático.</div></div>'
+   +'<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">'
+   +'<button class="mini" data-act="export">Exportar backup</button>'
+   +'<button class="mini" data-act="importUI">Importar backup</button>'
+   +'<button class="mini" data-act="restore">Restaurar planos e banco</button>'
+   +'<button class="mini" data-act="wipeDay">Limpar o dia</button></div>'
+   +'<div style="margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.55">'
+   +'Armazenamento: <b style="color:var(--text)">'+(S.backend==='db'?'nuvem do artefato':'localStorage deste navegador')+'</b>.<br><br>'
+   +'<b style="color:var(--text)">Sobre os valores nutricionais:</b> o banco traz valores de referência por 100 g, vindos de tabela de composição de alimentos, de rótulos de produtos e de estimativas para preparações compostas. Não foram conferidos em fonte oficial: confira o rótulo dos produtos de marca que você usa sempre e, se precisar corrigir algum, crie uma versão sua pelo botão "Criar alimento".</div>';
+  document.getElementById('sheetHost').innerHTML = sheet('Ajustes', body,
+    '<div class="tot"></div><button class="btn" data-act="saveCfg">Salvar</button>');
+}
+function openExport(){
+  Store.allDays(400).then(function(days){
+    var payload={exportadoEm:new Date().toISOString(),base:S.base,dias:days};
+    var body='<p style="font-size:12.5px;color:var(--muted);margin-top:0">'+days.length+' dia(s) registrados.</p>'
+     +'<a id="dlLink" class="btn block" style="text-decoration:none">Baixar .json</a>'
+     +'<textarea class="inp" style="margin-top:10px" readonly>'+esc(JSON.stringify(payload))+'</textarea>';
+    document.getElementById('sheetHost').innerHTML=sheet('Backup',body,'<div class="tot"></div><button class="btn ghost" data-act="close">Fechar</button>');
+    try{ var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      var a=document.getElementById('dlLink'); a.href=URL.createObjectURL(blob);
+      a.download='plano-alimentar-'+todayKey()+'.json';
+    }catch(e){ var a2=document.getElementById('dlLink'); if(a2) a2.style.display='none'; }
+  });
+}
+function openImport(){
+  document.getElementById('sheetHost').innerHTML=sheet('Importar',
+    '<label style="font-size:11px;color:var(--muted);font-weight:700">Cole o JSON do backup</label><textarea class="inp" id="impTxt"></textarea>',
+    '<div class="tot"></div><button class="btn" data-act="doImport">Importar</button>');
+}
+
+function toast(msg){
+  var d=document.createElement('div'); d.textContent=msg;
+  d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--text);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:13px;z-index:80';
+  document.body.appendChild(d); setTimeout(function(){ d.remove(); },2600);
+}
+
+/* ==========================================================================
+   H. Eventos
+   ========================================================================== */
+document.addEventListener('click',function(ev){
+  var tab=ev.target.closest('.tab');
+  if(tab){ S.tab=tab.dataset.tab; if(S.tab==='planos') S.planoView=dayPlanoId();
+    else Store.allDays(30).then(function(d){ S.hist=d; render(); });
+    render(); window.scrollTo(0,0); return; }
+
+  var el=ev.target.closest('[data-act]'); if(!el) return;
+  var act=el.dataset.act;
+
+  if(act==='closeBg'){ if(ev.target===el) closeSheet(); return; }
+  if(act==='close'){ closeSheet(); return; }
+  if(act==='prevDay'){ setDate(shiftKey(S.dateKey,-1)); return; }
+  if(act==='nextDay'){ setDate(shiftKey(S.dateKey,1)); return; }
+  if(act==='setPlano'){ setPlano(el.dataset.id); return; }
+  if(act==='viewPlano'){ S.planoView=el.dataset.id; render(); return; }
+  if(act==='selOpt'){ S.selOpt[el.dataset.key]=+el.dataset.i; render(); return; }
+  if(act==='water'){ addWater(+el.dataset.ml); return; }
+  if(act==='delRow'){ removeRow(el.dataset.id); return; }
+  if(act==='limparRef'){ clearMeal(el.dataset.meal); return; }
+  if(act==='buscar'){ openBusca(el.dataset.meal); return; }
+  if(act==='cat'){ S.busca.cat=el.dataset.c; renderBusca(); return; }
+  if(act==='pick'){ openQtd(el.dataset.id); return; }
+  if(act==='novoAlimento'){ openNovoAlimento(); return; }
+  if(act==='opcaoPlano'){ openOpcaoPlano(el.dataset.meal); return; }
+  if(act==='opPlanoSel'){ openOpcaoPlano(el.dataset.meal,null,+el.dataset.i); return; }
+  if(act==='openAjustes'){ openAjustes(); return; }
+  if(act==='export'){ openExport(); return; }
+  if(act==='importUI'){ openImport(); return; }
+
+  if(act==='regOpcao'){
+    if(el.dataset.plano!==dayPlanoId()){
+      setPlano(el.dataset.plano).then(function(){ S.tab='registro'; render(); openOpcaoPlano(el.dataset.meal,el.dataset.plano,+el.dataset.i); });
+    } else { S.tab='registro'; render(); openOpcaoPlano(el.dataset.meal,el.dataset.plano,+el.dataset.i); }
+    return;
+  }
+  if(act==='addQtd'){
+    var g=qtdGramas();
+    if(g<=0){ toast('Informe a quantidade.'); return; }
+    var mid=document.getElementById('qMeal').value;
+    var medSel=document.getElementById('qMed'), medLbl=medSel.options[medSel.selectedIndex].dataset.lbl;
+    var qv=document.getElementById('qVal').value;
+    addRows([ novoRegistro(el.dataset.id,g, n(medSel.value)===1?'':(qv+' '+medLbl), mid, mealNome(mid), document.getElementById('qHora').value) ]);
+    closeSheet(); return;
+  }
+  if(act==='addOpcao'){
+    var sel=opSelecao();
+    if(!sel.length){ toast('Selecione ao menos um alimento.'); return; }
+    var mid2=el.dataset.meal, hora=document.getElementById('opHora').value;
+    addRows(sel.map(function(x){ return novoRegistro(x.f,x.g,'',mid2,mealNome(mid2),hora); }));
+    closeSheet(); return;
+  }
+  if(act==='salvarAlimento'){
+    var nome=(document.getElementById('naNome').value||'').trim();
+    if(!nome){ toast('Dê um nome ao alimento.'); return; }
+    var b=S.base?JSON.parse(JSON.stringify(S.base)):basePadrao();
+    b.alimentosCustom=b.alimentosCustom||[];
+    b.alimentosCustom.push({ id:'cust-'+uid(), nome:nome, cat:(document.getElementById('naCat').value||'Meus alimentos'),
+      kcal:n(document.getElementById('naKcal').value), p:n(document.getElementById('naP').value),
+      c:n(document.getElementById('naC').value), g:n(document.getElementById('naG').value), fonte:'meu', med:[] });
+    Store.saveBase(b).then(function(){ toast('Alimento salvo.'); openBusca(S.busca.meal); });
+    return;
+  }
+  if(act==='saveCfg'){
+    var b2=S.base?JSON.parse(JSON.stringify(S.base)):basePadrao();
+    b2.config=b2.config||{};
+    b2.config.agua=n(document.getElementById('cfgAgua').value)||2500;
+    b2.config.baseMeta=document.getElementById('cfgBase').value;
+    Store.saveBase(b2).then(function(){ toast('Salvo.'); closeSheet(); });
+    return;
+  }
+  if(act==='doImport'){
+    var obj; try{ obj=JSON.parse(document.getElementById('impTxt').value); }catch(e){ toast('JSON inválido.'); return; }
+    if(obj.base&&obj.dias){
+      Store.saveBase(obj.base);
+      Promise.all(obj.dias.map(function(d){ return Store.saveDay(d); })).then(function(){
+        toast('Backup restaurado.'); subscribeDay(); closeSheet(); });
+    } else toast('Formato não reconhecido.');
+    return;
+  }
+  if(act==='restore'){ Store.saveBase(basePadrao()).then(function(){ toast('Restaurado.'); closeSheet(); }); return; }
+  if(act==='wipeDay'){ var d3=emptyDay(S.dateKey); d3.planoId=dayPlanoId(); commit(d3).then(function(){ toast('Dia limpo.'); closeSheet(); }); return; }
+});
+
+document.addEventListener('input',function(){ if(document.getElementById('opTot')) updOpTot(); });
+document.addEventListener('change',function(ev){
+  if(ev.target.dataset&&ev.target.dataset.act==='peso') setPeso(ev.target.value);
+  if(document.getElementById('opTot')) updOpTot();
+});
+document.getElementById('themeBtn').addEventListener('click',function(){
+  var cur=document.documentElement.getAttribute('data-theme');
+  var next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  try{ localStorage.setItem('nutri.theme',next); }catch(e){}
+});
+try{ var th=localStorage.getItem('nutri.theme'); if(th) document.documentElement.setAttribute('data-theme',th); }catch(e){}
+
+/* ==========================================================================
+   I. Boot
+   ========================================================================== */
+S.base=basePadrao();
+render();
+(async function(){
+  await Store.init();
+  S.unsubBase=Store.watchBase(function(b){
+    var pad=basePadrao();
+    if(b && n(b.versao)>=3 && b.planos && b.planos.length){
+      S.base = b;
+      S.base.planos = pad.planos;                    // planos vêm sempre do código
+      S.base.config = Object.assign({}, pad.config, b.config||{});
+      S.base.alimentosCustom = b.alimentosCustom||[];
+    } else S.base = pad;
+    S.planoView=dayPlanoId(); render();
+  });
+  subscribeDay();
+  Store.allDays(30).then(function(d){ S.hist=d; render(); });
+})();
+</script>
+</body>
+</html>
