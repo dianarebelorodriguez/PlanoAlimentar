@@ -133,7 +133,9 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(
 .chart .labels{display:flex;gap:7px;margin-top:4px}
 .chart .labels span{flex:1;text-align:center;font-size:9.5px;color:var(--muted)}
 .avgline{position:absolute;left:-4px;right:-4px;border-top:1.5px dashed var(--text);opacity:.7;pointer-events:none}
-.avgline span{position:absolute;right:0;top:-17px;font-size:10px;font-weight:600;background:var(--surface);color:var(--text);padding:0 4px;border-radius:4px}
+.avgleg{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:11px;font-weight:600;color:var(--text);margin:0 0 8px}
+.avgleg i{display:inline-block;width:18px;border-top:1.5px dashed var(--text);opacity:.7}
+.chart .pctl{text-shadow:0 0 3px var(--surface),0 0 3px var(--surface)}
 .hist-row{display:flex;gap:10px;padding:9px 16px;font-size:13px;align-items:center}
 .hist-row+.hist-row{border-top:1px solid var(--line)}
 .hist-row .hd{flex:1;min-width:0}
@@ -955,7 +957,7 @@ function barHTML(val,target){
 function difTxt(val,target){
   if(!target) return '';
   var d=Math.round(n(val)-n(target));
-  return ' <span style="color:'+(d>0?'var(--warn)':'var(--muted)')+'">('+(d>0?'+ ':'- ')+Math.abs(d)+' g)</span>';
+  return '<br><span style="white-space:nowrap;color:'+(d>0?'var(--warn)':'var(--muted)')+'">('+(d>0?'+ ':'- ')+Math.abs(d)+' g)</span>';
 }
 function macroBox(cls,label,val,target){
   return '<div class="macro '+cls+'"><div class="lbl">'+label+'</div>'
@@ -1029,13 +1031,13 @@ function histHTML(){
   var com=rows.filter(function(r){ return (r.d.registros||[]).length>0; });
   var media = com.length ? com.reduce(function(a,r){ return a+r.t.kcal; },0)/com.length : 0;
   var max=1; rows.forEach(function(r){ max=Math.max(max,r.t.kcal,r.meta); }); max=Math.max(max,media);
-  var h='<div class="sec-title"><h2>Últimos 7 dias</h2><span class="hint">kcal por dia</span></div><div class="card"><div class="chart"><div class="bars">';
+  var h='<div class="sec-title"><h2>Últimos 7 dias</h2><span class="hint">kcal por dia</span></div><div class="card"><div class="chart">'+(media>0?'<div class="avgleg"><i></i>média '+r0(media).toLocaleString('pt-BR')+' kcal</div>':'')+'<div class="bars">';
   rows.forEach(function(r){
     var pct=(r.t.kcal/max)*100, over=r.meta&&r.t.kcal>r.meta*1.05;
     var temReg=(r.d.registros||[]).length>0, dif=r.meta?Math.round((r.t.kcal/r.meta-1)*100):0;
     var lbl=temReg&&r.meta?'<b class="pctl" style="bottom:'+Math.min(pct,82).toFixed(1)+'%">'+(dif>0?'+':'')+dif+'%</b>':'';
     h+='<div class="stack '+(over?'over':'')+'"><i style="height:'+pct.toFixed(1)+'%"></i>'+lbl+'</div>'; });
-  if(media>0) h+='<div class="avgline" style="bottom:'+((media/max)*100).toFixed(1)+'%"><span>média '+r0(media).toLocaleString('pt-BR')+' kcal</span></div>';
+  if(media>0) h+='<div class="avgline" style="bottom:'+((media/max)*100).toFixed(1)+'%"></div>';
   h+='</div><div class="labels">';
   rows.forEach(function(r){ h+='<span>'+keyToDate(r.k).toLocaleDateString('pt-BR',{weekday:'short'}).slice(0,3)+'</span>'; });
   h+='</div></div>';
