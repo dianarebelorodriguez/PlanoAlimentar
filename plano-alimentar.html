@@ -114,7 +114,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(
 .subs summary::-webkit-details-marker{display:none}
 .subs summary::before{content:"⇄ "}
 .subs ul{margin:5px 0 2px;padding-left:16px;font-size:12px;color:var(--muted)}
-.obs{margin-top:9px;font-size:12px;color:var(--muted);background:var(--surface-2);padding:8px 10px;border-radius:var(--radius-sm)}
+.obs{white-space:pre-line;margin-top:9px;font-size:12px;color:var(--muted);background:var(--surface-2);padding:8px 10px;border-radius:var(--radius-sm)}
 .mtot{margin-top:8px;font-size:11.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
 .mtot b{color:var(--text);font-weight:600}
 .tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--surface-2);color:var(--muted);border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:1px}
@@ -124,12 +124,16 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(
 .water .wv small{font-family:Inter,sans-serif;font-size:11px;color:var(--muted);font-weight:500}
 .water .grow{flex:1}
 
-.chart{display:flex;align-items:flex-end;gap:7px;height:110px;padding:14px 16px 6px}
-.chart .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:4px}
-.chart .stack{width:100%;background:var(--surface-2);border-radius:5px 5px 0 0;position:relative;overflow:hidden;flex:1}
+.chart{padding:14px 16px 12px}
+.chart .bars{position:relative;display:flex;align-items:stretch;gap:7px;height:96px}
+.chart .stack{flex:1;background:var(--surface-2);border-radius:5px 5px 0 0;position:relative;overflow:hidden}
 .chart .stack>i{position:absolute;left:0;right:0;bottom:0;background:var(--accent)}
 .chart .stack.over>i{background:var(--warn)}
-.chart .cl{font-size:9.5px;color:var(--muted);text-align:center}
+.chart .pctl{position:absolute;left:0;right:0;text-align:center;font-size:9.5px;font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.1}
+.chart .labels{display:flex;gap:7px;margin-top:4px}
+.chart .labels span{flex:1;text-align:center;font-size:9.5px;color:var(--muted)}
+.avgline{position:absolute;left:-4px;right:-4px;border-top:1.5px dashed var(--text);opacity:.7;pointer-events:none}
+.avgline span{position:absolute;right:0;top:-17px;font-size:10px;font-weight:600;background:var(--surface);color:var(--text);padding:0 4px;border-radius:4px}
 .hist-row{display:flex;gap:10px;padding:9px 16px;font-size:13px;align-items:center}
 .hist-row+.hist-row{border-top:1px solid var(--line)}
 .hist-row .hd{flex:1;min-width:0}
@@ -198,6 +202,10 @@ textarea.inp{min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size
 function F(id,nome,cat,kcal,p,c,g,fonte,med){
   return {id:id,nome:nome,cat:cat,kcal:kcal,p:p,c:c,g:g,fonte:fonte,med:med||[]};
 }
+/* alimento com valores por PORÇÃO (restaurantes, comida de rua) */
+function P(id,nome,cat,por,kcal,p,c,g,fonte){
+  return {id:id,nome:nome,cat:cat,kcal:kcal,p:p,c:c,g:g,fonte:fonte,med:[],por:por};
+}
 var CS='colher de sopa', CC='colher de chá', CSV='colher de servir', UN='unidade', FT='fatia', XIC='xícara';
 
 var ALIM_BASE = [
@@ -218,14 +226,14 @@ F('granola','Granola sem açúcar','Cereais e massas',450,10.0,60.0,17.0,'estima
 F('bolacha-arroz','Bolacha de arroz','Cereais e massas',385,8.0,81.0,3.0,'rótulo',[[UN,7.5]]),
 F('pipoca','Pipoca sem óleo (estourada)','Cereais e massas',387,12.0,78.0,4.3,'estimativa',[[XIC,10]]),
 F('farofa','Farofa pronta','Cereais e massas',405,3.5,60.0,17.0,'estimativa',[[CS,15]]),
-F('pao-queijo','Pão de queijo','Cereais e massas',295,5.0,30.0,17.0,'estimativa',[[UN,30]]),
+F('pao-queijo','Pão de queijo','Cereais e massas',363,5.1,34.2,24.6,'TACO',[['coquetel (20 g)',20],['grande (60 g)',60],['unidade média (40 g)',40]]),
 
 /* --- Tubérculos --- */
 F('batata','Batata inglesa cozida','Tubérculos',52,1.2,11.9,0.1,'TACO',[[UN,100]]),
 F('batata-doce','Batata-doce cozida','Tubérculos',77,0.6,18.4,0.1,'TACO',[[FT,40]]),
 F('mandioca','Mandioca cozida','Tubérculos',125,0.6,30.1,0.3,'TACO',[]),
 F('pure-batata','Purê de batata','Tubérculos',93,1.8,14.0,3.4,'estimativa',[[CS,25]]),
-F('batata-frita','Batata frita','Tubérculos',312,4.0,36.0,16.5,'estimativa',[[XIC,80]]),
+F('batata-frita','Batata frita caseira','Tubérculos',267,5.0,35.6,13.1,'TACO',[[XIC,80]]),
 
 /* --- Leguminosas --- */
 F('feijao-preto','Feijão preto cozido','Leguminosas',77,4.5,14.0,0.5,'TACO',[['concha',80]]),
@@ -233,7 +241,7 @@ F('feijao-carioca','Feijão carioca cozido','Leguminosas',76,4.8,13.6,0.5,'TACO'
 F('lentilha','Lentilha cozida','Leguminosas',93,6.3,16.3,0.5,'TACO',[['concha',80]]),
 F('grao-de-bico','Grão-de-bico cozido','Leguminosas',164,8.9,27.4,2.6,'estimativa',[[CS,30]]),
 F('feijao-fradinho','Feijão-fradinho cozido','Leguminosas',78,5.1,13.5,0.5,'TACO',[['concha',80]]),
-F('homus','Homus','Leguminosas',177,7.9,14.3,9.6,'estimativa',[[CS,25]]),
+F('homus','Homus','Leguminosas',250,7.5,20,17.5,'plano',[['2 col. sopa (40 g)',40]]),
 F('edamame','Edamame cozido','Leguminosas',125,11.0,9.0,5.2,'estimativa',[]),
 
 /* --- Carnes, aves, peixes e ovos --- */
@@ -259,7 +267,7 @@ F('atum-mimi','Atum Mimi (pote, com o líquido)','Carnes e ovos',82,18.0,0,0.9,'
 F('sardinha','Sardinha em conserva','Carnes e ovos',208,24.0,0,12.0,'estimativa',[]),
 F('ovo-cozido','Ovo de galinha cozido','Carnes e ovos',146,13.3,0.6,9.5,'TACO',[[UN,50]]),
 F('ovo-mexido','Ovo mexido (com pouco óleo)','Carnes e ovos',196,13.6,1.6,15.0,'estimativa',[[UN,55]]),
-F('clara','Clara de ovo cozida','Carnes e ovos',52,10.9,0.7,0.2,'TACO',[[UN,33]]),
+F('clara','Clara de ovo cozida','Carnes e ovos',59,13.4,0,0.1,'TACO',[[UN,33]]),
 F('peito-peru','Peito de peru fatiado','Carnes e ovos',96,16.0,3.0,2.0,'rótulo',[[FT,15]]),
 F('presunto','Presunto magro','Carnes e ovos',122,17.0,2.0,5.0,'rótulo',[[FT,15]]),
 
@@ -267,9 +275,9 @@ F('presunto','Presunto magro','Carnes e ovos',122,17.0,2.0,5.0,'rótulo',[[FT,15
 F('leite-integral','Leite integral','Laticínios',61,3.2,4.7,3.3,'TACO',[['copo (200 ml)',200]]),
 F('leite-desnatado','Leite desnatado','Laticínios',35,3.4,4.9,0.2,'TACO',[['copo (200 ml)',200]]),
 F('leite-po-desnatado','Leite em pó desnatado (MOLICO)','Laticínios',357,35.0,52.0,1.0,'rótulo',[[CS,10]]),
-F('iogurte-natural','Iogurte natural integral','Laticínios',62,3.6,4.8,3.0,'TACO',[['pote',170]]),
-F('iogurte-natural-desnatado','Iogurte natural desnatado (Danone)','Laticínios',41,4.1,5.6,0.2,'rótulo',[['pote',160]]),
-F('iogurte-batavo-morango-zero','Iogurte Batavo Morango Zero','Laticínios',47,3.4,6.1,1.5,'rótulo',[['pote',170]]),
+F('iogurte-natural','Iogurte natural integral','Laticínios',51,4.1,1.9,3.0,'TACO',[['pote',170]]),
+F('iogurte-natural-desnatado','Iogurte natural desnatado (Danone)','Laticínios',52.5,5.6,7.5,0,'rótulo',[['pote',160]]),
+F('iogurte-batavo-morango-zero','Iogurte Batavo Pense Zero Morango','Laticínios',25.3,2.8,3.6,0,'rótulo',[['pote',170]]),
 F('iogurte-grego-zero','Iogurte Vigor Grego Zero','Laticínios',55,8.5,4.5,0.3,'rótulo',[['pote',90]]),
 F('iogurte-grego-tradicional','Iogurte grego tradicional','Laticínios',135,3.5,15.0,6.5,'estimativa',[['pote',100]]),
 F('queijo-minas','Queijo minas frescal','Laticínios',264,17.4,3.2,20.2,'TACO',[[FT,30]]),
@@ -279,7 +287,7 @@ F('parmesao','Queijo parmesão','Laticínios',453,35.6,1.7,33.5,'TACO',[[CS,10]]
 F('cottage','Queijo cottage','Laticínios',98,11.0,3.0,4.3,'rótulo',[[CS,25]]),
 F('creme-ricota-light','Creme de ricota light','Laticínios',160,8.0,4.0,12.0,'rótulo',[[CS,20]]),
 F('requeijao','Requeijão cremoso','Laticínios',257,9.6,3.0,23.0,'TACO',[[CS,20]]),
-F('manteiga','Manteiga','Laticínios',760,0.4,0.1,84.0,'TACO',[[CC,5]]),
+F('manteiga','Manteiga com sal','Laticínios',726,0.4,0.1,82.4,'TACO',[[CC,5]]),
 F('creme-de-leite','Creme de leite','Laticínios',218,2.1,3.7,21.5,'estimativa',[[CS,15]]),
 
 /* --- Frutas --- */
@@ -287,7 +295,7 @@ F('banana-prata','Banana prata','Frutas',98,1.3,26.0,0.1,'TACO',[[UN,55]]),
 F('banana-nanica','Banana nanica','Frutas',92,1.4,23.8,0.1,'TACO',[[UN,85]]),
 F('maca','Maçã com casca','Frutas',56,0.3,15.2,0.1,'TACO',[[UN,130]]),
 F('mamao','Mamão formosa','Frutas',45,0.8,11.6,0.1,'TACO',[[FT,120]]),
-F('manga','Manga','Frutas',64,0.4,16.7,0.2,'TACO',[[UN,150]]),
+F('manga','Manga','Frutas',64,0.4,16.7,0.2,'estimativa',[[UN,150]]),
 F('abacaxi','Abacaxi','Frutas',48,0.9,12.3,0.1,'TACO',[[FT,75]]),
 F('pera','Pera','Frutas',53,0.6,14.0,0.1,'TACO',[[UN,130]]),
 F('morango','Morango','Frutas',30,0.9,6.8,0.3,'TACO',[[UN,12]]),
@@ -305,7 +313,7 @@ F('abacate','Abacate','Frutas',96,1.2,6.0,8.4,'TACO',[[CS,25]]),
 F('salada-de-frutas','Salada de frutas','Frutas',50,0.6,12.8,0.2,'estimativa',[[XIC,140]]),
 F('damasco-seco','Damasco seco','Frutas',241,3.4,63.0,0.5,'estimativa',[[UN,7]]),
 F('uva-passa','Uva-passa','Frutas',299,3.1,79.0,0.5,'TACO',[[CS,10]]),
-F('coco-ralado','Coco ralado','Frutas',406,3.4,10.4,42.0,'TACO',[[CS,8]]),
+F('coco-ralado','Coco fresco','Frutas',406,3.7,10.4,42.0,'TACO',[[CS,8]]),
 
 /* --- Hortaliças --- */
 F('salada-folhas','Salada de folhas (alface, rúcula, agrião)','Hortaliças',16,1.4,2.3,0.2,'TACO',[['prato',80]]),
@@ -339,30 +347,30 @@ F('castanha-do-para','Castanha-do-pará','Gorduras',643,14.5,15.1,63.5,'TACO',[[
 F('castanha-caju','Castanha de caju','Gorduras',570,18.5,29.1,46.3,'TACO',[[UN,2]]),
 F('amendoa','Amêndoa','Gorduras',581,21.0,20.0,47.0,'TACO',[[UN,1.2]]),
 F('nozes','Nozes','Gorduras',620,14.0,18.0,59.0,'TACO',[[UN,5]]),
-F('amendoim','Amendoim torrado','Gorduras',544,27.2,20.3,43.9,'TACO',[[CS,10]]),
+F('amendoim','Amendoim torrado salgado','Gorduras',606,22.5,18.7,54.0,'TACO',[[CS,10]]),
 F('pasta-amendoim','Pasta de amendoim integral','Gorduras',588,25.0,20.0,48.0,'rótulo',[[CC,6],[CS,16]]),
 F('maionese','Maionese','Gorduras',700,1.0,3.0,75.0,'estimativa',[[CS,12]]),
 
 /* --- Açúcares e doces --- */
-F('acucar','Açúcar refinado','Doces',387,0,99.5,0,'TACO',[[CC,4],[CS,12]]),
-F('mel','Mel','Doces',309,0.1,84.0,0,'TACO',[[CC,7],[CS,20]]),
-F('doce-de-leite','Doce de leite cremoso','Doces',306,5.5,59.0,6.0,'TACO',[[CS,25]]),
-F('chocolate-po','Chocolate em pó','Doces',380,5.0,80.0,4.0,'rótulo',[[CS,10]]),
-F('achocolatado','Achocolatado em pó','Doces',400,3.5,90.0,2.0,'rótulo',[[CS,10]]),
-F('goiabada','Goiabada','Doces',270,0.6,67.0,0.1,'TACO',[[FT,50]]),
-F('bananinha','Bananinha / doce de banana','Doces',260,1.5,65.0,0.2,'estimativa',[[UN,25]]),
-F('geleia-diet','Geleia diet','Doces',120,0.3,28.0,0.1,'rótulo',[[CS,20]]),
-F('geleia','Geleia tradicional','Doces',260,0.4,65.0,0.1,'estimativa',[[CS,20]]),
-F('chocolate-ao-leite','Chocolate ao leite','Doces',540,7.0,59.0,30.0,'TACO',[['quadradinho',6]]),
-F('chocolate-70','Chocolate 70% cacau','Doces',570,8.0,34.0,42.0,'estimativa',[['quadradinho',6]]),
-F('brigadeiro','Brigadeiro','Doces',390,4.0,55.0,17.0,'estimativa',[[UN,20]]),
-F('sorvete','Sorvete de creme','Doces',200,3.5,23.0,10.0,'estimativa',[['bola',60]]),
-F('bolo-chocolate','Bolo de chocolate','Doces',380,5.0,55.0,15.0,'estimativa',[[FT,80]]),
-F('acai','Açaí batido com xarope','Doces',190,1.5,30.0,7.0,'estimativa',[['copo 300 ml',300]]),
+F('acucar','Açúcar refinado','Doces e sobremesas',387,0,99.5,0,'TACO',[[CC,4],[CS,12]]),
+F('mel','Mel','Doces e sobremesas',309,0.1,84.0,0,'TACO',[[CC,7],[CS,20]]),
+F('doce-de-leite','Doce de leite cremoso','Doces e sobremesas',306,5.5,59.0,6.0,'TACO',[[CS,25]]),
+F('chocolate-po','Chocolate em pó','Doces e sobremesas',380,5.0,80.0,4.0,'rótulo',[[CS,10]]),
+F('achocolatado','Achocolatado em pó','Doces e sobremesas',400,3.5,90.0,2.0,'rótulo',[[CS,10]]),
+F('goiabada','Goiabada','Doces e sobremesas',270,0.6,67.0,0.1,'TACO',[[FT,50]]),
+F('bananinha','Bananinha / doce de banana','Doces e sobremesas',260,1.5,65.0,0.2,'estimativa',[[UN,25]]),
+F('geleia-diet','Geleia diet','Doces e sobremesas',120,0.3,28.0,0.1,'rótulo',[[CS,20]]),
+F('geleia','Geleia tradicional','Doces e sobremesas',260,0.4,65.0,0.1,'estimativa',[[CS,20]]),
+F('chocolate-ao-leite','Chocolate ao leite','Doces e sobremesas',540,7.0,59.0,30.0,'TACO',[['quadradinho',6]]),
+F('chocolate-70','Chocolate 70% cacau','Doces e sobremesas',570,8.0,34.0,42.0,'estimativa',[['quadradinho',6]]),
+F('brigadeiro','Brigadeiro','Doces e sobremesas',390,4.0,55.0,17.0,'estimativa',[[UN,20]]),
+F('sorvete','Sorvete de creme','Doces e sobremesas',200,3.5,23.0,10.0,'estimativa',[['bola',60]]),
+F('bolo-chocolate','Bolo de chocolate com cobertura','Doces e sobremesas',367,4.1,54.6,16.4,'referência',[['fatia (100 g)',100]]),
+F('acai','Açaí batido com xarope','Doces e sobremesas',190,1.5,30.0,7.0,'estimativa',[['copo 300 ml',300]]),
 
 /* --- Bebidas --- */
 F('cafe','Café sem açúcar','Bebidas',2,0.1,0.3,0,'TACO',[['xícara 50 ml',50]]),
-F('suco-laranja','Suco de laranja natural','Bebidas',45,0.7,10.4,0.2,'TACO',[['copo 200 ml',200]]),
+F('suco-laranja','Suco de laranja natural','Bebidas',33,0.7,7.6,0.1,'TACO',[['copo 200 ml',200]]),
 F('suco-uva-integral','Suco de uva integral','Bebidas',60,0.3,15.0,0.1,'rótulo',[['copo 200 ml',200]]),
 F('agua-de-coco','Água de coco','Bebidas',22,0.3,5.3,0,'TACO',[['copo 200 ml',200]]),
 F('refrigerante','Refrigerante tipo cola','Bebidas',42,0,10.5,0,'rótulo',[['lata 350 ml',350]]),
@@ -379,29 +387,19 @@ F('albumina','Albumina','Suplementos',370,80.0,5.0,1.0,'rótulo',[['medidor',10]
 F('gel-mombora','Gel Mombora Goiaba','Suplementos',303,0.7,73.3,0,'plano',[['sachê',30]]),
 F('barra-proteica','Barra proteica','Suplementos',350,30.0,35.0,10.0,'rótulo',[[UN,45]]),
 F('barra-cereal','Barra de cereal','Suplementos',380,5.0,70.0,9.0,'rótulo',[[UN,25]]),
-F('livup-estrogonofe','Livup Estrogonofe de frango, arroz e batata assada','Pratos prontos',123,7.7,14.0,4.0,'plano',[['marmita',300]]),
-F('livup-almondega','Livup Almôndega de carne com fusilli','Pratos prontos',141,7.7,20.9,2.9,'plano',[['marmita',325]]),
-F('livup-carne-moida','Livup Carne moída, arroz integral e feijão carioca','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
-F('livup-frango-cremoso','Livup Frango cremoso, arroz, feijão e brócolis','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
-F('livup-escondidinho','Livup Escondidinho de frango com purê de batata-doce','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
-F('livup-hamburguer','Livup Hambúrguer de carne, arroz integral e legumes','Pratos prontos',123,7.7,14.0,4.0,'estimativa',[['marmita',300]]),
 
 /* --- Refeições prontas e comida fora --- */
 F('pf-completo','Prato feito (arroz, feijão, carne, salada)','Comida fora',145,9.0,17.0,4.5,'estimativa',[['prato',450]]),
-F('pizza','Pizza de mussarela','Comida fora',270,12.0,30.0,11.0,'estimativa',[[FT,100]]),
-F('hamburguer','Hambúrguer completo (lanche)','Comida fora',250,12.0,22.0,13.0,'estimativa',[[UN,220]]),
 F('sanduiche-natural','Sanduíche natural','Comida fora',200,10.0,25.0,6.0,'estimativa',[[UN,150]]),
 F('wrap-frango','Wrap de frango','Comida fora',200,13.0,22.0,7.0,'estimativa',[[UN,200]]),
-F('sushi','Sushi (niguiri/uramaki)','Comida fora',150,6.0,25.0,3.0,'estimativa',[['peça',25]]),
-F('temaki-salmao','Temaki de salmão','Comida fora',180,9.0,22.0,6.0,'estimativa',[[UN,220]]),
 F('yakisoba','Yakisoba','Comida fora',130,7.0,17.0,3.5,'estimativa',[['prato',400]]),
 F('misso-bowl','Bowl de frango com arroz e legumes','Comida fora',140,10.0,17.0,3.5,'estimativa',[['bowl',400]]),
-F('feijoada','Feijoada','Comida fora',155,10.0,10.0,8.0,'estimativa',[['concha',120]]),
+F('feijoada','Feijoada','Comida fora',117,8.7,11.6,6.5,'TACO',[['concha',120]]),
 F('lasanha','Lasanha à bolonhesa','Comida fora',165,9.0,15.0,7.5,'estimativa',[['porção',250]]),
 F('strogonoff','Strogonoff de frango','Comida fora',145,11.0,6.0,9.0,'estimativa',[['concha',120]]),
 F('risoto','Risoto','Comida fora',150,5.0,20.0,5.5,'estimativa',[['prato',300]]),
-F('coxinha','Coxinha','Comida fora',290,8.0,30.0,15.0,'estimativa',[[UN,80]]),
-F('pastel','Pastel de carne frito','Comida fora',350,9.0,32.0,20.0,'estimativa',[[UN,100]]),
+F('coxinha','Coxinha de frango frita','Comida fora',283,9.6,34.5,11.8,'TACO',[[UN,80]]),
+F('pastel','Pastel de carne frito','Comida fora',388,10.1,43.8,20.1,'TACO',[[UN,100]]),
 F('esfiha','Esfiha de carne','Comida fora',250,10.0,30.0,10.0,'estimativa',[[UN,80]]),
 F('salgadinho-chips','Salgadinho / batata chips','Comida fora',540,6.0,53.0,34.0,'estimativa',[['pacote 50 g',50]]),
 F('panqueca','Panqueca de carne','Comida fora',220,11.0,20.0,10.0,'estimativa',[[UN,120]]),
@@ -409,169 +407,407 @@ F('tapioca-queijo','Tapioca com queijo','Comida fora',280,8.0,42.0,9.0,'estimati
 F('molho-tomate','Molho de tomate','Comida fora',60,1.5,9.0,1.8,'estimativa',[[CS,20]]),
 F('ketchup','Ketchup','Comida fora',110,1.0,26.0,0.2,'rótulo',[[CS,15]]),
 F('shoyu','Molho shoyu','Comida fora',60,6.0,8.0,0.1,'rótulo',[[CS,15]]),
-F('generico-100','Item genérico (ajuste os macros)','Outros',100,5,10,3,'estimativa',[])
+F('generico-100','Item genérico (ajuste os macros)','Outros',100,5,10,3,'estimativa',[]),
+F('guacamole','Guacamole','Gorduras',200,2.5,10,17.5,'plano',[['40 g',40]]),
+
+/* --- Livup: rótulos oficiais (livup.com.br), valores por 100 g --- */
+F('livup-carne-moida','Livup – Carne moída, arroz integral e feijão carioca','Livup',123,8.2,16,2.9,'rótulo',[['marmita (300 g)',300]]),
+F('livup-escondidinho-de-carne-com-pure-de-batata','Livup – Escondidinho de carne com purê de batata','Livup',90,6.3,7.7,3.8,'rótulo',[['marmita (300 g)',300]]),
+F('livup-estrogonofe','Livup – Estrogonofe de frango, arroz e batata assada','Livup',123,7.6,14,4,'rótulo',[['marmita (300 g)',300]]),
+F('livup-file-mignon-suino-acebolado-arroz-e-feijao','Livup – Filé mignon suíno acebolado, arroz e feijão','Livup',137,14,15,2.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-nhoque-recheado-de-mussarela-ao-molho-de-tomate','Livup – Nhoque recheado de mussarela ao molho de tomate','Livup',157,5.4,19,6,'rótulo',[['marmita (300 g)',300]]),
+F('livup-frango-a-milanesa-arroz-e-creme-de-milho','Livup – Frango à milanesa, arroz e creme de milho','Livup',142,11,15,4.5,'rótulo',[['marmita (300 g)',300]]),
+F('livup-frango-cremoso','Livup – Frango cremoso, arroz, feijão e brócolis no vapor','Livup',106,8.7,14,1.9,'rótulo',[['marmita (300 g)',300]]),
+F('livup-almondega','Livup – Almôndega de carne com fusilli (325 g)','Livup',142,7.7,21,2.9,'rótulo',[['marmita (325 g)',325]]),
+F('livup-ravioli-de-mussarela-de-bufala-com-molho-de-tomate','Livup – Ravioli de mussarela de búfala com molho de tomate','Livup',155,6.3,19,5.9,'rótulo',[['marmita (300 g)',300]]),
+F('livup-almondega-de-carne-com-fusilli-370g-370','Livup – Almôndega de carne com fusilli (370 g)','Livup',163,7.3,21,5.3,'rótulo',[['marmita (370 g)',370]]),
+F('livup-yakisoba-de-frango-com-legumes','Livup – Yakisoba de frango com legumes','Livup',123,9.6,14,3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-penne-ao-molho-branco-salmao-em-lascas-e-brocolis','Livup – Penne ao molho branco, salmão em lascas e brócolis','Livup',116,6.7,15,3.4,'rótulo',[['marmita (300 g)',300]]),
+F('livup-ravioli-de-ricota-e-espinafre-com-molho-de-tomate','Livup – Ravioli de ricota e espinafre com molho de tomate','Livup',123,4.6,14,5.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-lasanha-a-bolonhesa','Livup – Lasanha à bolonhesa (340 g)','Livup',158,10,16,5.6,'rótulo',[['marmita (340 g)',340]]),
+F('livup-arroz-com-frutos-do-mar','Livup – Arroz com frutos do mar','Livup',133,7.7,18,3.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-saint-peter-molho-de-leite-de-coco-couscous-e-amendoas','Livup – Saint peter, molho de leite de coco, couscous e amêndoas','Livup',134,9.4,14,4.7,'rótulo',[['marmita (300 g)',300]]),
+F('livup-salmao-com-risoto-de-limao-siciliano-e-farofa-de-castanha','Livup – Salmão com risoto de limão siciliano e farofa de castanha','Livup',179,11,17,7.8,'rótulo',[['marmita (300 g)',300]]),
+F('livup-moqueca-de-peixe-arroz-com-castanhas-e-lascas-de-coco','Livup – Moqueca de peixe, arroz com castanhas e lascas de coco','Livup',131,8.3,15,4.4,'rótulo',[['marmita (300 g)',300]]),
+F('livup-bobo-de-camarao-e-arroz-jasmim-com-salsinha','Livup – Bobó de camarão e arroz jasmim com salsinha','Livup',134,3.9,22,3.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-frango-com-molho-teriyaki-e-arroz-oriental','Livup – Frango com molho teriyaki e arroz oriental','Livup',150,13,13,5.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-picadinho-de-carne-arroz-feijao-carioca-e-farofa','Livup – Picadinho de carne, arroz, feijão carioca e farofa','Livup',129,7.9,18,2.9,'rótulo',[['marmita (300 g)',300]]),
+F('livup-escondidinho','Livup – Escondidinho de frango com purê de batata-doce','Livup',107,8,12,2.9,'rótulo',[['marmita (300 g)',300]]),
+F('livup-coxa-e-sobrecoxa-de-frango-arroz-feijao-e-farofa','Livup – Coxa e sobrecoxa de frango, arroz, feijão e farofa','Livup',162,12,17,5.2,'rótulo',[['marmita (300 g)',300]]),
+F('livup-frango-ao-sugo-com-queijo-arroz-e-batata-assada','Livup – Frango ao sugo com queijo, arroz e batata assada','Livup',123,10,12,3.7,'rótulo',[['marmita (300 g)',300]]),
+F('livup-panqueca-de-frango-com-molho-de-tomate','Livup – Panqueca de frango com molho de tomate','Livup',115,9.3,10,3.9,'rótulo',[['marmita (300 g)',300]]),
+F('livup-estrogonofe-de-camarao-arroz-e-batata-com-paprica','Livup – Estrogonofe de camarão, arroz e batata com páprica','Livup',108,3.6,15,3.7,'rótulo',[['marmita (300 g)',300]]),
+F('livup-falafel-couscous-e-legumes-mediterraneos','Livup – Falafel, couscous e legumes mediterrâneos','Livup',201,8.5,28,6.1,'rótulo',[['marmita (300 g)',300]]),
+F('livup-lentilha-pomodoro-arroz-de-jasmim-e-brocolis','Livup – Lentilha pomodoro, arroz de jasmim e brócolis','Livup',122,5.8,20,2.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-estrogonofe-de-cogumelo-arroz-e-batata-assada','Livup – Estrogonofe de cogumelo, arroz e batata assada','Livup',101,3.3,15,3.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-quibe-de-abobora-arroz-com-brocolis-e-feijao','Livup – Quibe de abóbora, arroz com brócolis e feijão','Livup',138,5.4,21,3.4,'rótulo',[['marmita (300 g)',300]]),
+F('livup-panqueca-de-espinafre-e-queijos-com-molho-de-tomate','Livup – Panqueca de espinafre e queijos com molho de tomate','Livup',128,7.2,8.6,7.2,'rótulo',[['marmita (300 g)',300]]),
+F('livup-grao-de-bico-com-legumes-arroz-e-creme-de-milho','Livup – Grão-de-bico com legumes, arroz e creme de milho','Livup',135,6.8,19,3.5,'rótulo',[['marmita (300 g)',300]]),
+F('livup-proteina-de-soja-arroz-feijao-carioca-e-brocolis','Livup – Proteína de soja, arroz, feijão carioca e brócolis','Livup',89,5.6,15,0.9,'rótulo',[['marmita (300 g)',300]]),
+F('livup-feijoada-vegetariana-arroz-e-farofa','Livup – Feijoada vegetariana, arroz e farofa','Livup',136,4.5,23,2.7,'rótulo',[['marmita (300 g)',300]]),
+F('livup-proteina-de-soja-pure-de-batata-e-mix-de-legumes','Livup – Proteína de soja, purê de batata e mix de legumes','Livup',75,4.4,9.1,2.3,'rótulo',[['marmita (300 g)',300]]),
+F('livup-curry-de-legumes-com-grao-de-bico-e-arroz','Livup – Curry de legumes com grão-de-bico e arroz','Livup',161,4.6,21,6.6,'rótulo',[['marmita (300 g)',300]]),
+F('livup-grao-de-bico-com-cogumelo-mix-de-quinoa-e-legumes','Livup – Grão-de-bico com cogumelo, mix de quinoa e legumes','Livup',110,5.3,15,3.1,'rótulo',[['marmita (300 g)',300]]),
+F('livup-panqueca-de-forno-creme-de-milho-e-arroz','Livup – Panqueca de forno, creme de milho e arroz','Livup',159,9.1,20,4.9,'rótulo',[['marmita (300 g)',300]]),
+
+/* --- Ri Hi: Hi Poke, Olga Ri e Durum (planilha enviada), valores por porção do restaurante --- */
+P('rihi-durum-massa-do-pita','Durum – Massa do pita','Ri Hi','1 porção',261,7,40,8,'planilha'),
+P('rihi-durum-arroz-basmati-com-acafrao','Durum – Arroz basmati com açafrão','Ri Hi','1 porção',175,3,36,2,'planilha'),
+P('rihi-durum-couscous-marroquino-temperado','Durum – Couscous marroquino temperado','Ri Hi','1 porção',134,4,23,3,'planilha'),
+P('rihi-durum-folhas-frescas','Durum – Folhas frescas','Ri Hi','1 porção',8,0,1,0,'planilha'),
+P('rihi-durum-fregola-napolitana','Durum – Fregola napolitana','Ri Hi','1 porção',219,7,32,7,'planilha'),
+P('rihi-durum-couve-flor-noisette-e-limao','Durum – Couve-flor noisette e limão','Ri Hi','1 porção',62,2,4,5,'planilha'),
+P('rihi-durum-queijo-feta','Durum – Queijo feta','Ri Hi','1 porção',156,13,3,11,'planilha'),
+P('rihi-durum-cenoura-tamara-e-amendoas','Durum – Cenoura, tâmara e amêndoas','Ri Hi','1 porção',72,1,4,6,'planilha'),
+P('rihi-durum-brocolis-assado','Durum – Brócolis assado','Ri Hi','1 porção',21,2,4,1,'planilha'),
+P('rihi-durum-batata-assada-com-alecrim','Durum – Batata assada com alecrim','Ri Hi','1 porção',78,2,16,1,'planilha'),
+P('rihi-durum-vinagrete-de-grao-de-bico','Durum – Vinagrete de grão-de-bico','Ri Hi','1 porção',58,3,10,1,'planilha'),
+P('rihi-durum-coalhada-seca','Durum – Coalhada seca','Ri Hi','1 porção',66,3,5,3,'planilha'),
+P('rihi-durum-homus','Durum – Homus','Ri Hi','1 porção',121,5,12,7,'planilha'),
+P('rihi-durum-tapenade-de-azeitona','Durum – Tapenade de azeitona','Ri Hi','1 porção',98,0,0,10,'planilha'),
+P('rihi-durum-babaganuch','Durum – Babaganuch','Ri Hi','1 porção',67,3,7,4,'planilha'),
+P('rihi-durum-atum-selado-nicoise','Durum – Atum selado niçoise','Ri Hi','1 porção',214,38,0,7,'planilha'),
+P('rihi-durum-peito-de-frango-grelhado','Durum – Peito de frango grelhado','Ri Hi','1 porção',195,33,2,5,'planilha'),
+P('rihi-durum-sobrecoxa-com-laranja','Durum – Sobrecoxa com laranja','Ri Hi','1 porção',471,29,1,38,'planilha'),
+P('rihi-durum-tagliata-de-mignon','Durum – Tagliata de mignon','Ri Hi','1 porção',201,25,0,5,'planilha'),
+P('rihi-durum-kafta-de-cordeiro','Durum – Kafta de cordeiro','Ri Hi','1 porção',319,28,1,21,'planilha'),
+P('rihi-durum-falafel','Durum – Falafel','Ri Hi','1 porção',193,8,20,10,'planilha'),
+P('rihi-durum-iogurte-e-ervas','Durum – Iogurte e ervas','Ri Hi','1 porção',32,1,1,3,'planilha'),
+P('rihi-hi-poke-arroz-branco','Hi Poke – Arroz branco','Ri Hi','1 porção',53,0,12,0,'planilha'),
+P('rihi-hi-poke-arroz-branco-com-furikake','Hi Poke – Arroz branco com furikake','Ri Hi','1 porção',126,3,27,1,'planilha'),
+P('rihi-hi-poke-espetinho-de-angus','Hi Poke – Espetinho de angus','Ri Hi','1 porção',228,22,2,10,'planilha'),
+P('rihi-hi-poke-shimeji-preto-bento-principal','Hi Poke – Shimeji preto (Bentô · principal)','Ri Hi','1 porção',65,6,13,1,'planilha'),
+P('rihi-hi-poke-shimeji-preto-bento-complemento','Hi Poke – Shimeji preto (Bentô · complemento)','Ri Hi','1 porção',25,3,5,0,'planilha'),
+P('rihi-hi-poke-shimeji-preto-poke-principal','Hi Poke – Shimeji preto (Poke · principal)','Ri Hi','1 porção',38,3,7,1,'planilha'),
+P('rihi-hi-poke-salmao-grelhado','Hi Poke – Salmão grelhado','Ri Hi','1 porção',211,22,1,12,'planilha'),
+P('rihi-hi-poke-salada-de-batata','Hi Poke – Salada de batata','Ri Hi','1 porção',62,1,8,3,'planilha'),
+P('rihi-hi-poke-cenoura','Hi Poke – Cenoura','Ri Hi','1 porção',53,0,13,0,'planilha'),
+P('rihi-hi-poke-kimchi','Hi Poke – Kimchi','Ri Hi','1 porção',59,4,8,2,'planilha'),
+P('rihi-hi-poke-ovo','Hi Poke – Ovo','Ri Hi','1 porção',23,2,1,1,'planilha'),
+P('rihi-hi-poke-tofu-organico','Hi Poke – Tofu orgânico','Ri Hi','1 porção',29,3,1,2,'planilha'),
+P('rihi-hi-poke-edamame','Hi Poke – Edamame','Ri Hi','1 porção',49,4,4,2,'planilha'),
+P('rihi-hi-poke-batata-doce','Hi Poke – Batata doce','Ri Hi','1 porção',133,1,27,2,'planilha'),
+P('rihi-hi-poke-guioza-de-porco','Hi Poke – Guioza de porco','Ri Hi','1 porção',35,1,3,1,'planilha'),
+P('rihi-hi-poke-pimenta-sriracha','Hi Poke – Pimenta Sriracha','Ri Hi','1 porção',14,0,3,0,'planilha'),
+P('rihi-hi-poke-brocolis','Hi Poke – Brócolis','Ri Hi','1 porção',38,3,3,3,'planilha'),
+P('rihi-hi-poke-cebolinha','Hi Poke – Cebolinha','Ri Hi','1 porção',2,0,0,0,'planilha'),
+P('rihi-hi-poke-pepino','Hi Poke – Pepino','Ri Hi','1 porção',17,1,4,0,'planilha'),
+P('rihi-hi-poke-tomate','Hi Poke – Tomate','Ri Hi','1 porção',6,0,1,0,'planilha'),
+P('rihi-hi-poke-misso','Hi Poke – Missô','Ri Hi','1 porção',69,3,11,2,'planilha'),
+P('rihi-hi-poke-tare-adocicado','Hi Poke – Tarê (adocicado)','Ri Hi','1 porção',124,1,28,0,'planilha'),
+P('rihi-hi-poke-citrico-classico-limao','Hi Poke – Cítrico (clássico + limão)','Ri Hi','1 porção',46,1,5,2,'planilha'),
+P('rihi-hi-poke-shoyu','Hi Poke – Shoyu','Ri Hi','1 porção',31,2,4,0,'planilha'),
+P('rihi-hi-poke-mix-de-folhas','Hi Poke – Mix de folhas','Ri Hi','1 porção',6,0,1,0,'planilha'),
+P('rihi-hi-poke-quinoa','Hi Poke – Quinoa','Ri Hi','1 porção',61,2,9,2,'planilha'),
+P('rihi-hi-poke-atum-macaricado','Hi Poke – Atum maçaricado','Ri Hi','1 porção',63,14,1,1,'planilha'),
+P('rihi-hi-poke-atum','Hi Poke – Atum','Ri Hi','1 porção',63,14,1,1,'planilha'),
+P('rihi-hi-poke-camarao','Hi Poke – Camarão','Ri Hi','1 porção',74,15,1,2,'planilha'),
+P('rihi-hi-poke-camarao-macaricado','Hi Poke – Camarão maçaricado','Ri Hi','1 porção',74,15,1,2,'planilha'),
+P('rihi-hi-poke-polvo','Hi Poke – Polvo','Ri Hi','1 porção',95,14,2,2,'planilha'),
+P('rihi-hi-poke-polvo-macaricado','Hi Poke – Polvo maçaricado','Ri Hi','1 porção',95,14,2,2,'planilha'),
+P('rihi-hi-poke-salmao','Hi Poke – Salmão','Ri Hi','1 porção',94,10,1,5,'planilha'),
+P('rihi-hi-poke-salmao-macaricado','Hi Poke – Salmão maçaricado','Ri Hi','1 porção',94,10,1,5,'planilha'),
+P('rihi-hi-poke-kani-kama','Hi Poke – Kani kama','Ri Hi','1 porção',36,2,5,1,'planilha'),
+P('rihi-hi-poke-palmito-pupunha','Hi Poke – Palmito pupunha','Ri Hi','1 porção',13,1,1,0,'planilha'),
+P('rihi-hi-poke-manga','Hi Poke – Manga','Ri Hi','1 porção',68,0,18,0,'planilha'),
+P('rihi-hi-poke-nori','Hi Poke – Nori','Ri Hi','1 porção',3,0,0,0,'planilha'),
+P('rihi-hi-poke-gari','Hi Poke – Gari','Ri Hi','1 porção',14,0,4,0,'planilha'),
+P('rihi-hi-poke-massago','Hi Poke – Massago','Ri Hi','1 porção',9,1,0,0,'planilha'),
+P('rihi-hi-poke-wakame','Hi Poke – Wakame','Ri Hi','1 porção',18,1,2,1,'planilha'),
+P('rihi-hi-poke-classico-shoyu-oleo-de-gergelim','Hi Poke – Clássico (shoyu + óleo de gergelim)','Ri Hi','1 porção',52,1,5,3,'planilha'),
+P('rihi-hi-poke-trufado-citrico-trufa','Hi Poke – Trufado (cítrico + trufa)','Ri Hi','1 porção',48,1,4,3,'planilha'),
+P('rihi-hi-poke-wassabi-classico-wassabi','Hi Poke – Wassabi (clássico + wassabi)','Ri Hi','1 porção',51,0,5,3,'planilha'),
+P('rihi-olga-ri-massa-do-wrap','Olga Ri – Massa do wrap','Ri Hi','1 porção',261,7,40,8,'planilha'),
+P('rihi-olga-ri-fusilli-integral','Olga Ri – Fusilli integral','Ri Hi','1 porção',164,6,32,1,'planilha'),
+P('rihi-olga-ri-arroz-7-graos','Olga Ri – Arroz 7 grãos','Ri Hi','1 porção',118,4,24,1,'planilha'),
+P('rihi-olga-ri-rucula','Olga Ri – Rúcula','Ri Hi','1 porção',6,1,1,0,'planilha'),
+P('rihi-olga-ri-quinoa','Olga Ri – Quinoa','Ri Hi','1 porção',61,2,9,2,'planilha'),
+P('rihi-olga-ri-bifum','Olga Ri – Bifum','Ri Hi','1 porção',165,3,31,3,'planilha'),
+P('rihi-olga-ri-kale','Olga Ri – Kale','Ri Hi','1 porção',10,1,2,0,'planilha'),
+P('rihi-olga-ri-brocolis-assado-picante','Olga Ri – Brócolis assado picante','Ri Hi','1 porção',38,3,3,3,'planilha'),
+P('rihi-olga-ri-legumes-braseados-no-misso','Olga Ri – Legumes braseados no missô','Ri Hi','1 porção',41,1,7,1,'planilha'),
+P('rihi-olga-ri-tomate-sweet','Olga Ri – Tomate sweet','Ri Hi','1 porção',9,1,2,0,'planilha'),
+P('rihi-olga-ri-cenoura-ralada','Olga Ri – Cenoura ralada','Ri Hi','1 porção',14,1,3,0,'planilha'),
+P('rihi-olga-ri-edamame','Olga Ri – Edamame','Ri Hi','1 porção',55,5,5,2,'planilha'),
+P('rihi-olga-ri-manjericao','Olga Ri – Manjericão','Ri Hi','1 porção',1,0,0,0,'planilha'),
+P('rihi-olga-ri-queijo-de-cabra','Olga Ri – Queijo de cabra','Ri Hi','1 porção',89,5,2,7,'planilha'),
+P('rihi-olga-ri-mussarela-de-bufala','Olga Ri – Mussarela de búfala','Ri Hi','1 porção',93,6,0,8,'planilha'),
+P('rihi-olga-ri-ovo-bio','Olga Ri – Ovo bio','Ri Hi','1 porção',78,6,1,6,'planilha'),
+P('rihi-olga-ri-abacaxi-grelhado','Olga Ri – Abacaxi grelhado','Ri Hi','1 porção',27,1,7,0,'planilha'),
+P('rihi-olga-ri-couve-flor-gratinada-com-ricota','Olga Ri – Couve-flor gratinada com ricota','Ri Hi','1 porção',71,3,3,5,'planilha'),
+P('rihi-olga-ri-abobora-assada','Olga Ri – Abóbora assada','Ri Hi','1 porção',31,1,6,1,'planilha'),
+P('rihi-olga-ri-cebola-roxa','Olga Ri – Cebola roxa','Ri Hi','1 porção',8,0,2,0,'planilha'),
+P('rihi-olga-ri-milho','Olga Ri – Milho','Ri Hi','1 porção',36,1,6,1,'planilha'),
+P('rihi-olga-ri-vagem-com-limao-siciliano','Olga Ri – Vagem com limão siciliano','Ri Hi','1 porção',27,1,2,2,'planilha'),
+P('rihi-olga-ri-repolho-roxo','Olga Ri – Repolho roxo','Ri Hi','1 porção',15,1,4,0,'planilha'),
+P('rihi-olga-ri-pepino','Olga Ri – Pepino','Ri Hi','1 porção',6,1,1,0,'planilha'),
+P('rihi-olga-ri-palmito-pupunha','Olga Ri – Palmito pupunha','Ri Hi','1 porção',19,2,2,0,'planilha'),
+P('rihi-olga-ri-frango-crispy-assado','Olga Ri – Frango crispy assado','Ri Hi','1 porção',179,18,17,4,'planilha'),
+P('rihi-olga-ri-rosbife-de-mignon','Olga Ri – Rosbife de mignon','Ri Hi','1 porção',121,18,0,5,'planilha'),
+P('rihi-olga-ri-frango-grelhado-em-cubos','Olga Ri – Frango grelhado em cubos','Ri Hi','1 porção',145,24,1,5,'planilha'),
+P('rihi-olga-ri-caponata-de-berinjela','Olga Ri – Caponata de berinjela','Ri Hi','1 porção',98,2,10,6,'planilha'),
+P('rihi-olga-ri-cogumelos-assados','Olga Ri – Cogumelos assados','Ri Hi','1 porção',126,6,8,5,'planilha'),
+P('rihi-olga-ri-salmao-grelhado-certificado','Olga Ri – Salmão grelhado certificado','Ri Hi','1 porção',211,22,1,12,'planilha'),
+P('rihi-olga-ri-tofu-organico-assado','Olga Ri – Tofu orgânico assado','Ri Hi','1 porção',107,4,4,8,'planilha'),
+P('rihi-olga-ri-citrico-de-framboesa','Olga Ri – Cítrico de framboesa','Ri Hi','1 porção',57,0,7,4,'planilha'),
+
+/* --- Comida de rua: tabela enviada pelo nutricionista (faixas de kcal pelo ponto médio) --- */
+P('pizza-leve','Pizza de frango ou marguerita (sabores leves)','Comida de rua','1 fatia média',290,12,35,11,'plano'),
+P('pizza-pesada','Pizza de frango c/ catupiry, pepperoni ou bacon','Comida de rua','1 fatia média',350,14,32,18,'plano'),
+P('pizza-doce','Pizza doce de chocolate ao leite','Doces e sobremesas','1 fatia média',425,8,52,21,'plano'),
+P('hamburguer-simples','Hambúrguer simples','Comida de rua','1 unidade',525,28,40,28,'plano'),
+P('hamburguer-gourmet','Hambúrguer gourmet com molho','Comida de rua','1 unidade',850,40,50,55,'plano'),
+P('batata-frita-porcao','Batata frita (porção de restaurante)','Comida de rua','120 g',375,4,45,19,'plano'),
+P('esfirra-aberta','Esfirra aberta','Comida de rua','1 unidade',250,9,30,10,'plano'),
+P('empadao','Empadão','Comida de rua','1 fatia (~150 g)',450,14,38,28,'plano'),
+P('macarronada','Macarronada','Comida de rua','1 prato',800,35,105,28,'plano'),
+P('carbonara','Carbonara ou massa com muito queijo','Comida de rua','1 prato',1000,38,95,55,'plano'),
+P('steak-magra','Steak de carne magra','Comida de rua','150 g',325,40,0,19,'plano'),
+P('steak-gorda','Steak de carne gorda','Comida de rua','150 g',450,34,0,36,'plano'),
+P('brownie','Brownie','Doces e sobremesas','1 unidade (~100 g)',425,5,52,22,'plano'),
+P('sorvete-baccio','Sorvete Baccio di Latte','Doces e sobremesas','1 bola (~100 g)',275,4,32,14,'plano'),
+/* --- Japonês --- */
+P('sashimi-gordo','Sashimi de peixe gordo (salmão)','Japonês','1 fatia (~25 g)',50,5,0,3.5,'plano'),
+P('sashimi-magro','Sashimi de peixe magro (branco ou atum)','Japonês','1 fatia (~25 g)',30,6,0,0.5,'plano'),
+P('nigiri','Niguiri','Japonês','1 unidade',60,4,8,1.5,'plano'),
+P('hot-filadelfia','Hot filadélfia','Japonês','1 unidade',100,3,10,5,'plano'),
+P('uramaki-salmao','Uramaki de salmão com cream cheese','Japonês','1 peça',50,2,7,1.5,'estimativa'),
+P('uramaki-california','Uramaki califórnia (kani, pepino, manga)','Japonês','1 peça',45,1.5,8,1,'estimativa'),
+P('hossomaki-pepino','Hossomaki de pepino (kappa)','Japonês','1 peça',25,0.5,5.5,0.1,'estimativa'),
+P('hossomaki-salmao','Hossomaki de salmão','Japonês','1 peça',30,1.5,5,0.5,'estimativa'),
+P('joe-salmao','Joe de salmão','Japonês','1 peça',70,3,6,4,'estimativa'),
+P('temaki-salmao','Temaki de salmão com cream cheese','Japonês','1 unidade',280,12,35,9,'estimativa'),
+P('temaki-hot','Temaki hot (empanado)','Japonês','1 unidade',400,12,42,20,'estimativa'),
+P('gyoza','Guioza / gyoza','Japonês','1 unidade',45,2,5,2,'estimativa'),
+P('harumaki','Harumaki (rolinho primavera)','Japonês','1 unidade',120,3,12,7,'estimativa'),
+P('tempura-camarao','Tempurá de camarão','Japonês','1 unidade',60,3,5,3,'estimativa'),
+P('missoshiru','Missoshiru','Japonês','1 tigela',40,3,4,1.5,'estimativa'),
+P('sunomono','Sunomono','Japonês','1 porção',40,0.5,9,0.1,'estimativa'),
+P('gohan','Gohan (arroz japonês)','Japonês','1 tigela (~150 g)',195,3.5,43,0.3,'estimativa'),
+P('shimeji-manteiga','Shimeji na manteiga','Japonês','1 porção (~100 g)',90,3,5,7,'estimativa'),
+P('ceviche','Ceviche de peixe','Japonês','1 porção (~150 g)',150,25,6,3,'estimativa'),
+/* --- Comida de rua: estimativas adicionais --- */
+P('cachorro-quente','Cachorro-quente simples','Comida de rua','1 unidade',300,11,32,14,'estimativa'),
+P('misto-quente','Misto-quente','Comida de rua','1 unidade',280,15,28,12,'estimativa'),
+P('pao-na-chapa','Pão francês na chapa com manteiga','Comida de rua','1 unidade',230,6,30,9,'estimativa'),
+P('esfiha-fechada','Esfiha fechada de carne','Comida de rua','1 unidade',230,9,30,8,'estimativa'),
+P('quibe-frito','Quibe frito','Comida de rua','1 unidade (~80 g)',230,10,18,13,'estimativa'),
+P('crepe-salgado','Crepe salgado (frango e queijo)','Comida de rua','1 unidade',400,22,35,18,'estimativa'),
+P('acaraje','Acarajé completo','Comida de rua','1 unidade',450,12,35,30,'estimativa'),
+P('churros','Churros recheado','Doces e sobremesas','1 unidade',250,3,32,12,'estimativa'),
+P('picole-fruta','Picolé de fruta','Doces e sobremesas','1 unidade',80,0,20,0,'estimativa'),
+P('picole-creme','Picolé cremoso','Doces e sobremesas','1 unidade',180,2,20,10,'estimativa'),
+/* --- Doces e sobremesas adicionais --- */
+F('bolo-chocolate-simples','Bolo de chocolate sem cobertura','Doces e sobremesas',358,5.3,53.4,15.1,'referência',[['fatia (80 g)',80]]),
+F('bolo-cenoura-chocolate','Bolo de cenoura com cobertura de chocolate','Doces e sobremesas',377,3.8,50.9,17.6,'referência',[['fatia (100 g)',100]]),
+F('bolo-cenoura-brigadeiro','Bolo de cenoura com brigadeiro (receita caseira)','Doces e sobremesas',455,7.5,55.7,20.4,'referência',[['fatia (100 g)',100]]),
+F('cheesecake','Cheesecake tradicional','Doces e sobremesas',321,5.5,25.5,22.5,'referência',[['fatia (120 g)',120]]),
+F('cheesecake-frutas','Cheesecake de frutas vermelhas','Doces e sobremesas',273,6.25,32.9,13.45,'referência',[['fatia (130 g)',130]]),
+F('cheesecake-chocolate','Cheesecake de chocolate','Doces e sobremesas',389,6.6,38.4,24.75,'referência',[['fatia (120 g)',120]]),
+F('cookie-chocolate','Cookie com gotas de chocolate','Doces e sobremesas',489,4.9,63,24,'referência',[['cookie pequeno (30 g)',30],['cookie de padaria (90 g)',90]]),
+F('mousse-chocolate','Mousse de chocolate','Doces e sobremesas',209,4.2,15.7,14.6,'referência',[['taça (100 g)',100]]),
+F('leite-condensado','Leite condensado','Doces e sobremesas',313,7.7,57.0,6.7,'TACO',[['col. sopa (20 g)',20]]),
+F('creme-avela','Creme de avelã (tipo Nutella)','Doces e sobremesas',539,6.3,57.5,30.9,'rótulo',[['col. sopa (20 g)',20]]),
+F('pudim','Pudim de leite condensado','Doces e sobremesas',230,5.5,38,6,'estimativa',[['fatia (100 g)',100]]),
+F('torta-limao','Torta de limão','Doces e sobremesas',330,5,40,17,'estimativa',[['fatia (120 g)',120]]),
+F('torta-holandesa','Torta holandesa','Doces e sobremesas',400,5,33,28,'estimativa',[['fatia (120 g)',120]]),
+F('banoffee','Banoffee','Doces e sobremesas',330,4,42,17,'estimativa',[['fatia (120 g)',120]]),
+F('torta-maca','Torta de maçã','Doces e sobremesas',237,2,34,11,'estimativa',[['fatia (120 g)',120]]),
+F('tiramisu','Tiramisu','Doces e sobremesas',283,4.6,30,16,'estimativa',[['porção (120 g)',120]]),
+F('pave-chocolate','Pavê de chocolate','Doces e sobremesas',300,5,38,15,'estimativa',[['porção (120 g)',120]]),
+F('mousse-maracuja','Mousse de maracujá','Doces e sobremesas',220,4,30,9,'estimativa',[['taça (100 g)',100]]),
+F('bolo-fuba','Bolo de fubá','Doces e sobremesas',330,5,50,12,'estimativa',[['fatia (80 g)',80]]),
+F('bolo-simples','Bolo simples (laranja, baunilha), sem cobertura','Doces e sobremesas',340,5,52,12,'estimativa',[['fatia (80 g)',80]]),
+F('cupcake','Cupcake com cobertura','Doces e sobremesas',380,4,55,16,'estimativa',[['unidade (70 g)',70]]),
+F('sonho','Sonho recheado','Doces e sobremesas',330,6,45,14,'estimativa',[['unidade (80 g)',80]]),
+F('donut','Donut com cobertura','Doces e sobremesas',410,5,50,22,'estimativa',[['unidade (70 g)',70]]),
+F('alfajor','Alfajor','Doces e sobremesas',430,5,60,19,'estimativa',[['unidade (50 g)',50]]),
+F('bombom','Bombom de chocolate recheado','Doces e sobremesas',520,5,60,28,'estimativa',[['unidade (20 g)',20]]),
+F('beijinho','Beijinho','Doces e sobremesas',400,5,60,15,'estimativa',[['unidade (20 g)',20]]),
+F('pacoca','Paçoca de amendoim','Doces e sobremesas',480,13,52,24,'estimativa',[['unidade (20 g)',20]]),
+F('pao-de-mel','Pão de mel','Doces e sobremesas',380,5,60,13,'estimativa',[['unidade (40 g)',40]]),
+F('chocolate-branco','Chocolate branco','Doces e sobremesas',560,6,58,33,'estimativa',[['quadradinho (6 g)',6]]),
+F('bala-goma','Bala de goma / jujuba','Doces e sobremesas',330,5,78,0,'estimativa',[['punhado (30 g)',30]]),
+F('sorvete-chocolate','Sorvete de chocolate (massa)','Doces e sobremesas',220,3.8,28,11,'estimativa',[['bola (60 g)',60]]),
+F('frozen-yogurt','Frozen yogurt natural','Doces e sobremesas',130,3.5,25,1.5,'estimativa',[['copo (150 g)',150]]),
+F('chantilly','Chantilly','Doces e sobremesas',300,2,15,26,'estimativa',[['col. sopa (15 g)',15]]),
+P('petit-gateau','Petit gâteau com sorvete','Doces e sobremesas','1 porção',480,7,55,26,'estimativa'),
+P('crepe-doce','Crepe doce (creme de avelã ou doce de leite)','Doces e sobremesas','1 unidade',450,8,58,20,'estimativa'),
+/* --- itens dos planos 2.x --- */
+F('alface','Alface','Hortaliças',11,1.3,1.7,0.2,'TACO',[['prato',50]]),
+F('rucula','Rúcula','Hortaliças',13,1.8,2.2,0.1,'TACO',[['prato',30]]),
+F('cebola-roxa','Cebola roxa crua','Hortaliças',39,1.7,8.9,0.1,'TACO',[['col. sopa',10]]),
+F('yorgus-grego-desnatado','Iogurte Yorgus Grego Desnatado (zero lactose)','Laticínios',54,11.5,2.0,0,'rótulo',[['pote',130]]),
+P('gatorade','Gatorade (garrafa 500 ml)','Bebidas','1 garrafa (500 ml)',120,0,30,0,'rótulo'),
+P('yopro-15g','YoPRO 15 g de proteína (250 ml)','Suplementos','1 unidade (250 ml)',140,15,12,3.5,'estimativa'),
+P('barra-proteina-20g','Barra de proteína (20 g de proteína)','Suplementos','1 barra',200,20,20,7,'estimativa'),
+P('suco-abacaxi-olgari','Olga Ri – Suco de abacaxi','Ri Hi','1 copo',155,0.5,38,0,'plano'),
+F('livup-frango-oriental','Livup – Frango oriental, arroz com brócolis e abóbora','Livup',115,9.8,11,3.4,'rótulo',[['marmita (300 g)',300]]),
+F('livup-frango-em-tiras','Livup – Frango em tiras, mix de quinoa, brócolis e cenoura','Livup',116,12,7.9,4.6,'rótulo',[['marmita (300 g)',300]]),
+P('gari','Gari (gengibre em conserva)','Japonês','1 porção',80,1,20,0,'meu'),
+P('wasabi','Wasabi','Japonês','1 porção',30,1,3,0.1,'meu')
 ];
 
 /* ==========================================================================
-   B. PLANOS – cada item aponta para um alimento do banco + gramas do PDF
+   B. PLANOS 2.x (nutricionista Henrique Haidar, prescritos em 30/09 e 01/10/2026)
+   Cada item aponta para um alimento do banco + quantidade do PDF.
+   Substituições estruturadas {f,g,q} viram troca selecionável no registro.
    ========================================================================== */
 function I(f,g,q,s){ return {f:f,g:g,q:q,s:s||[]}; }
+function SB(f,g,q){ return {f:f,g:g,q:q}; }
 function OP(id,nome,presc,itens,obs){
-  return {id:id,nome:nome,prescrito:{p:presc[0],c:presc[1],g:presc[2],kcal:presc[3]},itens:itens,obs:obs||''};
+  return {id:id,nome:nome,prescrito:presc?{p:presc[0],c:presc[1],g:presc[2],kcal:presc[3]}:null,itens:itens,obs:obs||''};
 }
-var S_FRUTA='Banana 55 g (1 un. pequena) ou maçã 65 g (1/2 un. média). Também abacaxi 120 g, mamão 120 g, manga 100 g, pera 110 g ou morango 220 g.';
-var S_BERRY='Morango 48 g, amora 24 g ou cereja 21 g.';
-var S_PAO='Pão francês 50 g ou tapioca 40 g (2 col. sopa rasas).';
-var S_VEG='Vegetais são flexíveis: folhas e hortaliças de preferência, molhos calóricos à parte.';
-var S_LIVUP=['Livup Carne moída, arroz integral e feijão carioca 300 g.','Livup Frango cremoso, arroz, feijão e brócolis 300 g.','Livup Escondidinho de frango com purê de batata-doce 300 g.','Livup Hambúrguer de carne, arroz integral e legumes 300 g.'];
-var S_SALADA='Alface, rúcula, repolho, couve ou espinafre; combinar com cenoura, brócolis, abobrinha, chuchu, couve-flor, palmito ou tomate.';
+var FRANGO_OR='rihi-olga-ri-frango-grelhado-em-cubos';
+function salada(lista){ return lista.map(function(f){ return I(f,0,'à vontade'); }); }
+var SAL4=['alface','rucula','tomate','cebola-roxa'];
+var S_FRUTA_IOG=[SB('banana-prata',60,'1,5 unidade média (60 g)'),SB('maca',100,'1/2 unidade grande (100 g)')];
+var S_FRUTA_PAO=[SB('maca',100,'1/2 unidade grande (100 g)'),SB('banana-prata',55,'1 unidade grande (55 g)')];
+var S_BERRY=[SB('morango',48,'4 unidades médias (48 g)'),SB('amora',24,'6 unidades (24 g)'),SB('cereja',21,'3 unidades (21 g)')];
+var S_SUCO=[SB('kiwi',76,'1 unidade média (76 g)'),SB('goiabada',20,'20 g'),SB('doce-de-leite',15,'15 g'),SB('banana-prata',40,'1 unidade média (40 g)')];
+var S_FEIJAO=[SB('arroz-branco',37.5,'1,5 col. sopa cheia (37,5 g)'),SB('lentilha',52.5,'1,5 col. servir cheia (52,5 g)')];
+var S_LIVUP=[SB('livup-carne-moida',300,'1 unidade (300 g)'),SB('livup-frango-cremoso',300,'1 unidade (300 g)'),SB('livup-escondidinho',300,'1 unidade (300 g)'),
+  SB('livup-yakisoba-de-frango-com-legumes',300,'1 unidade (300 g)'),SB('livup-frango-oriental',300,'1 unidade (300 g)'),
+  SB('livup-frango-em-tiras',300,'1 unidade (300 g)'),SB('livup-picadinho-de-carne-arroz-feijao-carioca-e-farofa',300,'1 unidade (300 g)'),
+  'Livup Hambúrguer de carne, arroz integral com brócolis e legumes – 1 unidade (300 g); sem tabela no banco de alimentos'];
+var S_DANONE=[SB('iogurte-batavo-morango-zero',340,'2 unidades (340 g)')];
+var S_PROT=[SB('barra-proteina-20g',0.5,'1/2 barrinha de 20 g de proteína')];
 
-function mCafe(){ return {id:'cafe',nome:'Café da manhã',obs:'',opcoes:[
-  OP('cafe-batavo','Opção 1 – Iogurte (Batavo + leite em pó)',[16.0,49.7,5.9,304],[
-    I('iogurte-batavo-morango-zero',170,'170 g (1 unidade)',['Danone Natural desnatado 160 g – use a variação Danone.']),
-    I('chia',15,'15 g (1 col. sopa cheia)',['Manter 15 g.']),
-    I('salada-de-frutas',70,'70 g (cerca de 1/2 xícara)',[S_FRUTA]),
-    I('aveia',15,'15 g (1 col. sopa cheia)',[]),
-    I('leite-po-desnatado',20,'20 g (2 col. sopa)',['No Batavo, pode ser trocado por whey 15 g (1 medidor).'])]),
-  OP('cafe-danone','Opção 1 – Iogurte (Danone + aveia + whey)',[19.0,47.0,6.9,314],[
-    I('iogurte-natural-desnatado',160,'160 g',[]),
-    I('chia',15,'15 g',[]),
-    I('salada-de-frutas',70,'70 g',[S_FRUTA]),
-    I('aveia',22.5,'22,5 g (1 1/2 col. sopa cheia)',[]),
-    I('whey',7.5,'7,5 g (1/2 medidor)',[])]),
-  OP('cafe-atum','Opção 2 – Pão (atum + pão integral)',[17.2,31.9,7.8,261],[
-    I('atum-oleo',32,'32 g (2 col. sopa cheias)',['Conjunto alternativo: ovos cozidos 100 g + pão francês 50 g + mirtilo 20 g.']),
-    I('creme-ricota-light',30,'30 g (1 1/2 col. sopa)',[]),
-    I('pao-forma-integral',50,'50 g (2 fatias)',[S_PAO]),
-    I('kiwi',76,'76 g (1 unidade média)',['Mirtilo 20 g. '+S_BERRY])]),
-  OP('cafe-ovos','Opção 2 – Pão (ovos + pão francês)',[15.3,32.7,10.0,280],[
-    I('ovo-cozido',100,'100 g (2 unidades médias)',[]),
-    I('pao-frances',50,'50 g (1 unidade)',[]),
-    I('mirtilo',20,'20 g (10 unidades)',[S_BERRY])]),
-  OP('cafe-fora','Opção 3 – Dia de refeições fora',[27.4,19.7,2.8,211],[
-    I('atum-mimi',120,'120 g (1 pote)',['Whey 30 g (2 medidores).']),
-    I('iogurte-batavo-morango-zero',170,'170 g (1 unidade)',[]),
-    I('mirtilo',20,'20 g (10 unidades)',[S_BERRY]),
-    I('banana-prata',40,'40 g (1 un. média do plano)',[])],
-    'Café mais proteico para dias com almoço e jantar fora. Nesse dia, não fazer o lanche da tarde.')
-]};}
-
-function marmitaCasa(g_arroz,g_feijao,comFruta,comLegumes){
-  var its=[ I('frango-grelhado',80,'80 g (cerca de 4 col. sopa)',[]),
-    I('arroz-integral',g_arroz,g_arroz+' g',['Arroz branco '+(g_arroz===110?'90 g':'135-140 g')+', macarrão cozido '+g_arroz+' g, macarrão de arroz '+g_arroz+' g ou quinoa cozida '+(g_arroz===110?'130 g':'190 g')+'.']),
-    I('feijao-preto',g_feijao,g_feijao+' g ('+(g_feijao===80?'1 concha rasa':'2 conchas rasas')+')',['Feijão carioca '+g_feijao+' g, lentilha '+(g_feijao===80?'65-70 g':'130-135 g')+', grão-de-bico '+(g_feijao===80?'40 g':'80 g')+' ou feijão-fradinho '+(g_feijao===80?'70-75 g':'145 g')+'.']) ];
-  if(comFruta) its.push(I('maca',65,'65 g (1/2 unidade média)',[]));
-  if(comLegumes) its.push(I('legumes-cozidos',55,'55 g (1 col. servir cheia)',['Brócolis, cenoura, abobrinha, chuchu, couve-flor, vagem, berinjela ou abóbora.']));
-  its.push(I('salada-folhas',50,'folhas 50 g',[S_SALADA]));
-  its.push(I('hortalicas-cruas',100,'hortaliças até 100 g',['Sem molho calórico.']));
-  return its;
-}
-function mAlmocoMusc(){ return {id:'almoco',nome:'Almoço',obs:'',opcoes:[
-  OP('alm-livup','Livup',[23.1,42.0,12.0,369],[I('livup-estrogonofe',300,'300 g (1 unidade)',S_LIVUP)]),
-  OP('alm-casa','Marmita de casa',[25.5,48.3,10.7,369],marmitaCasa(110,80,true,false))
-]};}
-function mAlmocoCorrida(){ return {id:'almoco',nome:'Almoço',obs:'',opcoes:[
-  OP('alm-corr-casa','Padrão corrida – marmita de casa',[31.3,66.1,11.5,453],marmitaCasa(165,160,false,true)),
-  OP('alm-corr-livup','Padrão corrida – Livup',[25.0,67.9,9.4,458],[I('livup-almondega',325,'325 g (1 unidade)',[])]),
-  OP('alm-fora-casa','Dia de jantar fora – marmita de casa',[25.5,48.3,10.7,369],marmitaCasa(110,80,true,false)),
-  OP('alm-fora-livup','Dia de jantar fora – Livup',[23.1,42.0,12.0,369],[I('livup-estrogonofe',300,'300 g (1 unidade)',S_LIVUP)])
-]};}
-
-function mLanche(comDanone){
+function opsIogurte(pref,rot,presc){ return [
+  OP(pref+'-iog',rot,presc,[
+    I('iogurte-natural-desnatado',160,'1 unidade (160 g)',S_DANONE),
+    I('chia',15,'1 col. sopa cheia (15 g)'),
+    I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),
+    I('aveia',15,'1 col. sopa cheia (15 g)'),
+    I('whey',7.5,'1/2 medidor (7,5 g)')]),
+  OP(pref+'-batavo',rot+' · 1 Batavo + whey',null,[
+    I('iogurte-batavo-morango-zero',170,'1 unidade (170 g)'),
+    I('chia',15,'1 col. sopa cheia (15 g)'),
+    I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),
+    I('aveia',15,'1 col. sopa cheia (15 g)'),
+    I('whey',15,'1 medidor completo (15 g)')],'Com só 1 Batavo, usar 1 medidor completo de whey.'),
+  OP(pref+'-semwhey',rot+' · sem whey',null,[
+    I('iogurte-natural-desnatado',160,'1 unidade (160 g)',S_DANONE),
+    I('chia',15,'1 col. sopa cheia (15 g)'),
+    I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),
+    I('leite-po-desnatado',20,'2 col. sopa (20 g)')],'Sem whey: tirar aveia e whey e usar leite em pó desnatado Molico.'),
+  OP(pref+'-yorgus',rot+' · Yorgus Grego',null,[
+    I('yorgus-grego-desnatado',130,'1 pote (130 g)'),
+    I('chia',15,'1 col. sopa cheia (15 g)'),
+    I('salada-de-frutas',70,'1 porção (70 g)'),
+    I('banana-prata',55,'1 banana grande (55 g)')],'Com Yorgus Grego Desnatado, não comer aveia nem whey; comer uma banana grande junto da salada de frutas.')
+];}
+function opsPao(pref,rot,presc){ return [
+  OP(pref+'-pao',rot,presc,[
+    I('atum-mimi',60,'1/2 pote (60 g)'),
+    I('creme-ricota-light',30,'1 porção (30 g)'),
+    I('pao-frances',50,'1 unidade (50 g)'),
+    I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_PAO)]),
+  OP(pref+'-ovos',rot+' · ovos',null,[
+    I('ovo-cozido',50,'1 ovo inteiro'),
+    I('clara',66,'2 claras'),
+    I('pao-frances',50,'1 unidade (50 g)'),
+    I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_PAO)],'Ovo inteiro e claras mexidos no lugar de atum e ricota.'),
+  OP(pref+'-minas',rot+' · queijo minas + YoPRO',null,[
+    I('pao-frances',50,'1 unidade (50 g)'),
+    I('queijo-minas',30,'30 g'),
+    I('yopro-15g',1,'1 unidade (15 g de proteína)',S_PROT)],'Queijo minas e YoPRO no lugar de atum, ricota e fruta.'),
+  OP(pref+'-pq',rot+' · 3 pães de queijo + YoPRO',null,[
+    I('pao-queijo',60,'3 coquetel ou 1 grande (60 g)'),
+    I('yopro-15g',1,'1 unidade (15 g de proteína)',S_PROT)]),
+  OP(pref+'-barra',rot+' · barrinha + fruta',null,[
+    I('barra-proteina-20g',1,'1 unidade'),
+    I('maca',150,'1 maçã média/grande',[SB('salada-de-frutas',95,'salada de frutas (70-120 g)')])])
+];}
+function mCafe(){ return {id:'cafe',nome:'Café da manhã',obs:'',opcoes:
+  opsIogurte('cafe','1) Iogurte',[19.0,47.0,6.9,314])
+  .concat(opsPao('cafe','2) Pão',[18.4,46.7,5.9,313]))
+  .concat([
+    OP('cafe-semlanche','3) Sem lanche da tarde',[22.1,2.9,2.7,123],[
+      I('atum-mimi',120,'1 pote (120 g)',[SB('whey',30,'2 medidores (30 g)')]),
+      I('mirtilo',20,'10 unidades (20 g)',S_BERRY)],
+      'Para dias de almoço e jantar fora durante a semana, ou de uma grande refeição no fim de semana. Nesse dia, não fazer o lanche da tarde.'),
+    OP('cafe-semlanche-prot','3) Sem lanche · refeições proteicas',null,[
+      I('salada-de-frutas',70,'1 fruta ou salada de frutas'),
+      I('chia',15,'1 col. sopa (15 g)')],'Usar se as refeições fora forem proteicas. Nesse dia, não fazer o lanche da tarde.')
+  ])};}
+function marmita(arroz,subsArroz){ return [
+  I(FRANGO_OR,1,'1 porção (80 g)'),
+  I('arroz-branco',arroz,arroz+' g',subsArroz),
+  I('feijao-preto',80,'1 concha rasa (80 g)',S_FEIJAO),
+  I('legumes-cozidos',55,'1 col. servir cheia (55 g)')].concat(salada(SAL4)); }
+function mAlmoco(turbinado){
   var ops=[
-    OP('lan-batavo',comDanone?'Opção 1 – Iogurte (Batavo)':'Opção 1 – Iogurte',[16.0,49.7,5.9,304],[
-      I('iogurte-batavo-morango-zero',170,'170 g (1 unidade)',['Iogurte Vigor Grego Zero 90 g.']),
-      I('chia',15,'15 g (1 col. sopa cheia)',[]),
-      I('salada-de-frutas',70,'70 g',['Banana 55 g, maçã 65 g ou uma porção da lista de frutas.']),
-      I('aveia',15,'15 g (1 col. sopa cheia)',[]),
-      I('leite-po-desnatado',20,'20 g (2 col. sopa)',[])])
-  ];
-  if(comDanone) ops.push(OP('lan-danone','Opção 1 – Iogurte (Danone)',[14.9,50.5,6.6,307],[
-    I('iogurte-natural-desnatado',160,'160 g',[]), I('chia',15,'15 g',[]),
-    I('salada-de-frutas',70,'70 g',[]), I('aveia',22.5,'22,5 g (1 1/2 col. sopa cheia)',[])]));
-  ops.push(OP('lan-whey','Opção 2 – Sem iogurte + whey',[16.2,43.8,8.3,296],[
-    I('chia',15,'15 g (1 col. sopa cheia)',[]),
-    I('aveia',15,'15 g (1 col. sopa cheia)',[]),
-    I('banana-prata',55,'55 g (1 un. grande do plano)',['Porção de pão/fibra: pão integral 25 g, tapioca 20 g, bolacha de arroz 15 g (2 un.) ou pipoca sem óleo 18,5 g de grãos.']),
-    I('maca',65,'65 g (1/2 unidade média)',[]),
-    I('whey',15,'15 g (1 medidor)',['Lanche salgado ocasional: 1 porção de pão/fibra + iogurte 140 g, homus 2 col. sopa ou queijo 35-40 g.'])]));
-  return {id:'lanche',nome:'Lanche da tarde',obs:'Não fazer nos dias em que o café escolhido foi "Dia de refeições fora".',opcoes:ops};
+    OP('alm-livup','1) Livup',[23.1,42.0,12.0,369],[I('livup-estrogonofe',300,'1 unidade (300 g)',S_LIVUP)].concat(salada(SAL4))),
+    OP('alm-casa','2) Casa',[26.8,51.3,9.9,388],marmita(125,[SB('arroz-integral',150,'150 g'),SB('macarrao',125,'125 g')]),'Versão marmita de casa para substituir a Livup.')];
+  if(turbinado){
+    ops.push(OP('alm-livup-turb','3) Livup turbinada',[26.1,80.6,9.6,514],
+      [I('livup-almondega',325,'1 unidade (325 g)')].concat(salada(SAL4)).concat([I('suco-laranja',150,'150 ml',S_SUCO)])));
+    ops.push(OP('alm-casa-turb','4) Casa turbinada',[29.3,79.4,10.2,514],
+      marmita(180,[SB('arroz-integral',216,'216 g'),SB('macarrao',180,'180 g')]).concat([I('suco-laranja',150,'150 ml',S_SUCO)]),
+      'Versão marmita de casa para substituir a Livup turbinada.'));
+  }
+  return {id:'almoco',nome:'Almoço',obs:'',opcoes:ops};
 }
-function mJantar(){ return {id:'jantar',nome:'Jantar normal',obs:'Em dias com musculação e corrida, priorizar polvo ou frango Korin.',opcoes:[
-  OP('jan-normal','Jantar normal',[27.8,50.4,11.0,385],[
-    I('frango-grelhado',80,'80 g (cerca de 4 col. sopa)',['Camarão cozido 100 g, polvo cozido 100 g ou frango Korin 110 g.','Tilápia ou truta em porção próxima de 100 g.']),
-    I('pepino',87,'87 g (cerca de 1/2 un. grande)',[S_VEG]),
-    I('tomate-cereja',60,'60 g (6 unidades)',[S_VEG]),
-    I('palmito',30,'30 g (2 col. sopa cheias)',[S_VEG]),
-    I('cenoura',55,'55 g (cerca de 4 col. sopa)',[S_VEG]),
-    I('arroz-integral',110,'110 g (2 col. servir cheias)',['Arroz branco 90 g, macarrão 110 g, macarrão de arroz 110 g, batata inglesa 220 g ou batata-doce 145-150 g.']),
-    I('feijao-preto',80,'80 g (1 concha rasa)',['Feijão carioca 80 g, lentilha 65-70 g, grão-de-bico 40 g, abóbora cabotiá 90 g.'])])
-]};}
-function mCeia(){ return {id:'ceia',nome:'Ceia',obs:'Escolha uma opção nos dias sem refeição livre e com jantar normal.',opcoes:[
-  OP('ceia-1','Opção 1 – Banana + aveia + whey',[16.5,51.8,4.8,310],[
-    I('banana-prata',110,'110 g (2 un. grandes do plano)',['A fruta pode variar em porção equivalente de carboidrato.']),
-    I('psyllium',10,'10 g (1 col. sopa)',[]),
-    I('aveia',30,'30 g (2 col. sopa cheias)',[]),
-    I('whey',15,'15 g (1 medidor)',[])]),
-  OP('ceia-2','Opção 2 – Pão com ricota + iogurte',[17.1,47.6,6.4,310],[
-    I('geleia-diet',20,'20 g (1 col. sopa)',[]),
-    I('creme-ricota-light',30,'30 g (1 1/2 col. sopa)',[]),
-    I('pao-forma-integral',50,'50 g (2 fatias)',[S_PAO]),
-    I('iogurte-grego-zero',90,'90 g (1 unidade)',[]),
-    I('kiwi',76,'76 g (1 unidade média)',['Outra fruta com carboidrato semelhante.']),
-    I('aveia',7,'7 g (1/2 col. sopa)',[])]),
-  OP('ceia-3','Opção 3 – Tapioca com queijo',[12.6,51.3,5.9,308],[
-    I('goma-tapioca',60,'60 g (4 col. sopa rasas)',['Pão francês 50 g.']),
-    I('queijo-minas',30,'30 g (1 fatia média)',[]),
-    I('iogurte-grego-zero',90,'90 g (1 unidade)',[]),
-    I('mirtilo',20,'20 g (10 unidades)',[S_BERRY])])
-]};}
-function mJantarCal(){ return {id:'jantar-calorico',nome:'Jantar calórico (sem ceia)',alternativa:true,
-  obs:'Usar no lugar de jantar normal + ceia. Gordura total em torno de 16 g (faixa 15-17 g). Sugestões do plano para comer fora: Strogo Crush (Wrappd by Sofy) + 200 ml de suco de laranja; Saint Peter ou frango Korin com arroz, legumes e adicional de batata-doce; Missô Bowl com frango crispy + 2 abacaxi e 1 fusilli (37 g de carbo); salada Olga Ri com 2 fusilli + 2 abacaxi + 2 abóbora (60 g de carbo) + frango, montagem de referência 419 kcal.',
-  opcoes:[ OP('jc-1','Montagem padrão',[44.3,102.2,15.8,695],[
-    I('frango-grelhado',120,'120 g (5-6 col. sopa em cubos)',['Polvo 120 g, tilápia/truta 140-145 g ou camarão 180-190 g.','Com salmão, reduzir ou retirar o azeite.']),
-    I('arroz-integral',220,'220 g (4 col. servir cheias)',['Arroz branco 180-185 g, macarrão 220 g ou batata-doce 290-300 g.']),
-    I('feijao-preto',160,'160 g (2 conchas rasas)',['Feijão carioca 160 g, lentilha 130-135 g, grão-de-bico 80 g ou feijão-fradinho 145 g.']),
-    I('legumes-cozidos',150,'150 g (1 1/2 xícara)',[]),
-    I('salada-folhas',125,'100-150 g',[]),
-    I('banana-prata',55,'55 g (1 unidade)',['Maçã 100 g, manga 100 g, pera 110 g ou kiwi 130 g.']),
-    I('azeite',5,'5 g (1 col. chá)',['Avocado 50 g ou castanhas 10 g.'])]) ]};}
-function mPre(){ return {id:'pre-treino',nome:'Pré-treino',obs:'Idealmente 1 hora antes da corrida.',opcoes:[
-  OP('pre-1','Opção 1 – Pão + banana + doce de leite',[6.0,45.2,3.3,231],[
-    I('pao-forma',25,'25 g (1 fatia)',[]), I('banana-prata',40,'40 g (1 un. média do plano)',[]), I('doce-de-leite',40,'40 g (1 col. sopa cheia)',[])]),
-  OP('pre-2','Opção 2 – Tapioca + doce de leite',[1.7,52.4,1.6,230],[
-    I('goma-tapioca',52.5,'52,5 g (3 1/2 col. sopa rasas)',[]), I('doce-de-leite',25,'25 g (1 col. sobremesa cheia)',[])]),
-  OP('pre-3','Opção 3 – Banana com chocolate e mel',[5.7,50.2,1.1,225],[
-    I('banana-prata',80,'80 g (2 un. médias do plano)',[]), I('chocolate-po',30,'30 g (3 col. sopa rasas)',[]), I('mel',9,'9 g (1 col. sobremesa rasa)',[])])
-]};}
-function mIntra(curto){
-  var obs = curto
-    ? 'Consumir após 20 minutos. Hidratação: 100 ml 15 min antes; depois 100 ml nos km 3, 6 e 9.'
-    : 'Consumir metade aos 20 min e metade aos 50 min. Hidratação: 100 ml 15 min antes; depois 100 ml nos km 3, 6, 9, 12 e 15.';
-  return {id:'intra-treino',nome:'Intra-treino',obs:obs,opcoes: curto ? [
-    OP('intra-1','Goiabada + damasco',[0.4,20.4,0.1,80],[
-      I('goiabada',25,'25 g (1/2 fatia)',['Bananinha Santa Branca Zero 35 g (1 unidade).']), I('damasco-seco',7,'7 g (1 unidade)',[])]),
-    OP('intra-2','Gel Mombora Goiaba',[0.2,22.0,0.0,91],[I('gel-mombora',30,'30 g (1 unidade)',[])])
-  ] : [
-    OP('intra-1','Goiabada + damasco',[0.7,40.8,0.1,160],[
-      I('goiabada',50,'50 g (1 fatia)',['Bananinha Santa Branca Zero 70 g (2 unidades).']), I('damasco-seco',14,'14 g (2 unidades)',[])]),
-    OP('intra-2','Gel Mombora Goiaba',[0.4,44.0,0.0,182],[I('gel-mombora',60,'60 g (2 unidades)',[])])
+function mLanche(){
+  var ops=opsIogurte('lan','Iogurte',[19.0,47.0,6.9,314]);
+  ops.push(OP('lan-pq3','3 pães de queijo + whey',null,[I('pao-queijo',60,'3 coquetel ou 1 grande (60 g)'),I('whey',22.5,'1,5 medidor (22,5 g)')]));
+  ops.push(OP('lan-pq2','2 pães de queijo + fruta + whey',null,[I('pao-queijo',40,'2 coquetel (40 g)'),I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),I('whey',22.5,'1,5 medidor (22,5 g)')]));
+  ops=ops.concat(opsPao('lan','Pão (opção do café)',[18.4,46.7,5.9,313]));
+  return {id:'lanche',nome:'Lanche da tarde',obs:'Qualquer opção de café da manhã também pode ser usada como lanche da tarde.',opcoes:ops};
+}
+function mJantar(comSubs){
+  var sf=comSubs?[SB('lentilha',105,'3 col. servir cheias (105 g)')]:[];
+  var sb=comSubs?[SB('kiwi',76,'1 unidade média (76 g)')]:[];
+  function base(carbs){ return [I(FRANGO_OR,1,'1 porção (80 g)')].concat(carbs)
+    .concat([I('legumes-cozidos',55,'1 col. servir cheia (55 g)')]).concat(salada(['alface','rucula']))
+    .concat([I('banana-prata',40,'1 unidade média (40 g)',sb)]); }
+  return {id:'jantar',nome:'Jantar',obs:'Meta da refeição: 695 kcal, com 33,5 g de proteína e 101,7 g de carboidrato.',opcoes:[
+    OP('jan-arroz','Arroz',null,base([I('arroz-branco',250,'250 g'),I('feijao-preto',200,'200 g',sf)])),
+    OP('jan-ifood','Macarrão',[38.3,119.9,11.5,695],base([I('macarrao',300,'6 col. servir cheias (300 g)'),I('feijao-preto',160,'2 conchas rasas (160 g)',sf)])),
+    OP('jan-farofa','Arroz + Farofa',null,base([I('arroz-branco',200,'200 g'),I('farofa',30,'30 g',[SB('batata-doce',80,'80 g de batata-doce assada')]),I('feijao-preto',160,'160 g',sf)]))
   ]};
 }
+function mAdicional(extra){
+  var obs='Meta: 200 kcal, com maioria de carboidratos. Pode distribuir ao longo do dia.\n\n'
+    +'Outras formas de cumprir:\n'
+    +'– Jantar de 800 kcal (33,5+ g de proteína e 101,7+ g de carboidrato)\n'
+    +'– Sem pré-treino: almoço Elvira + jantar de salada low carb com proteína do Olga Ri\n'
+    +'– Sem pré-treino: jantar de 1000 kcal (33,5+ g de proteína e 101,7+ g de carboidrato)'
+    +(extra?'\n– Se for usar o almoço normal: jantar de 1000 kcal (33,5+ g de proteína e 101,7+ g de carboidrato)':'');
+  return {id:'adicional',nome:'Adicional calórico',obs:obs,opcoes:[
+    OP('adc-maca','Maçã + aveia',[2.9,41.2,2.3,185],[I('maca',200,'1 unidade grande (200 g)'),I('aveia',15,'1 col. sopa cheia (15 g)')]),
+    OP('adc-arroz-feijao','Arroz + feijão',null,[I('arroz-branco',100,'100 g'),I('feijao-preto',80,'80 g')]),
+    OP('adc-arroz','Arroz ou macarrão',null,[I('arroz-branco',200,'200 g',[SB('macarrao',200,'200 g de macarrão')])]),
+    OP('adc-suco','Suco + aveia',null,[I('suco-abacaxi-olgari',1,'1 copo (155 kcal)'),I('aveia',10,'10 g')],'Ou um suco de 130 kcal no lugar do suco de abacaxi do Olga Ri.')
+  ]};
+}
+function mPre(){ return {id:'pre-treino',nome:'Pré-treino',
+  obs:'Goiabada ou gel: comer metade 15 min antes do treino e o resto na metade do treino.\nHidratação: 300 ml 15 min antes de começar e 200 ml a cada 3 km de corrida.',
+  opcoes:[
+    OP('pre-goiabada','Goiabada',[0.4,44.9,0.1,174],[I('goiabada',70,'70 g',[SB('gel-mombora',60,'Gel Mombora Goiaba – 2 unidades (60 g)')])]),
+    OP('pre-banana-choc','2 bananas + chocolate em pó',null,[I('banana-prata',80,'2 bananas'),I('chocolate-po',20,'20 g')]),
+    OP('pre-banana-ddl','1 banana + doce de leite',null,[I('banana-prata',40,'1 banana'),I('doce-de-leite',40,'40 g')]),
+    OP('pre-gatorade','Gatorade + goiabada',null,[I('gatorade',1,'1 garrafa'),I('goiabada',25,'25 g')]),
+    OP('pre-pao','Pão francês + geleia',null,[I('pao-frances',50,'1 unidade'),I('geleia',10,'10 g',[SB('doce-de-leite',10,'10 g de doce de leite')])])
+  ]};}
 
 function basePadrao(){
-  return { versao:3, config:{ agua:2500, baseMeta:'prescricao' }, alimentosCustom:[], planos:[
-    { id:'1.1', nome:'Musculação', curto:'Musculação', subtitulo:'Plano 1.1 – dia de musculação',
-      referencia:{p:98.5,c:240.5,g:41.7,kcal:1679}, refFonte:'impressa no PDF',
-      refeicoes:[ mCafe(), mAlmocoMusc(), mLanche(true), mJantar(), mCeia(), mJantarCal() ] },
-    { id:'1.2', nome:'Corrida 11-12 km', curto:'11-12 km', subtitulo:'Plano 1.2 – corrida intermediária',
-      referencia:{p:114.0,c:333.3,g:42.5,kcal:2067}, refFonte:'recalculada (o PDF imprime 1.838 kcal, que não fecha com as opções)',
-      refeicoes:[ mPre(), mIntra(true), mCafe(), mAlmocoCorrida(), mLanche(false), mJantar(), mCeia(), mJantarCal() ] },
-    { id:'1.3', nome:'Corrida 16-17 km', curto:'16-17 km', subtitulo:'Plano 1.3 – corrida longa',
-      referencia:{p:110.4,c:353.4,g:43.6,kcal:2144}, refFonte:'impressa no PDF',
-      refeicoes:[ mPre(), mIntra(false), mCafe(), mAlmocoCorrida(), mLanche(false), mJantar(), mCeia(), mJantarCal() ] }
+  return { versao:4, config:{ baseMeta:'prescricao' }, alimentosCustom:[], planos:[
+    { id:'2.1', nome:'Musculação', curto:'Musc.', subtitulo:'Plano 2.1 – musculação',
+      referencia:{p:99.4,c:255.9,g:37.3,kcal:1692}, refeicoes:[ mCafe(), mAlmoco(false), mLanche(), mJantar(true) ] },
+    { id:'2.2', nome:'Corrida 11-12 km', curto:'11-12 km', subtitulo:'Plano 2.2 – corrida 11-12 km',
+      referencia:{p:102.6,c:342.0,g:39.7,kcal:2051}, refeicoes:[ mAdicional(false), mPre(), mCafe(), mAlmoco(false), mLanche(), mJantar(true) ] },
+    { id:'2.3', nome:'Corrida 16-17 km', curto:'16-17 km', subtitulo:'Plano 2.3 – corrida 16-17 km',
+      referencia:{p:105.6,c:380.6,g:37.3,kcal:2196}, refeicoes:[ mAdicional(true), mPre(), mCafe(), mAlmoco(true), mLanche(), mJantar(false) ] }
   ]};
 }
+/* planos anteriores: só para o histórico dos dias registrados com eles */
+var PLANOS_ANTIGOS = {
+  '1.1':{id:'1.1',nome:'Musculação (plano 1.1)',curto:'Musc. 1.1',subtitulo:'Plano 1.1 – anterior',referencia:{p:98.5,c:240.5,g:41.7,kcal:1679},refeicoes:[]},
+  '1.2':{id:'1.2',nome:'Corrida 11-12 km (plano 1.2)',curto:'11-12 km 1.2',subtitulo:'Plano 1.2 – anterior',referencia:{p:114.0,c:333.3,g:42.5,kcal:2067},refeicoes:[]},
+  '1.3':{id:'1.3',nome:'Corrida 16-17 km (plano 1.3)',curto:'16-17 km 1.3',subtitulo:'Plano 1.3 – anterior',referencia:{p:110.4,c:353.4,g:43.6,kcal:2144},refeicoes:[]}
+};
 
 /* ==========================================================================
    C. Estado e utilidades
@@ -600,12 +836,13 @@ function alimentos(){
   var extra=(S.base&&S.base.alimentosCustom)||[];
   var map={}; ALIM_BASE.forEach(function(a){ map[a.id]=a; });
   extra.forEach(function(a){ map[a.id]=a; });
+  ((S.base&&S.base.alimentosOcultos)||[]).forEach(function(id){ delete map[id]; });
   return Object.keys(map).map(function(k){ return map[k]; });
 }
 function alim(id){ var a=alimentos().filter(function(x){return x.id===id;}); return a[0]||null; }
-function macrosDe(id,gramas){
+function macrosDe(id,qtd){
   var a=alim(id); if(!a) return {kcal:0,p:0,c:0,g:0};
-  var f=n(gramas)/100;
+  var f = a.por ? n(qtd) : n(qtd)/100;
   return {kcal:a.kcal*f, p:a.p*f, c:a.c*f, g:a.g*f};
 }
 function somaMacros(list){ var t={kcal:0,p:0,c:0,g:0};
@@ -613,15 +850,18 @@ function somaMacros(list){ var t={kcal:0,p:0,c:0,g:0};
 function calcOpcao(op){ return somaMacros((op.itens||[]).map(function(i){ return macrosDe(i.f,i.g); })); }
 
 function planos(){ return (S.base&&S.base.planos)||[]; }
-function planoById(id){ var a=planos().filter(function(p){return p.id===id;}); return a[0]||planos()[0]; }
+function planoById(id){ var a=planos().filter(function(p){return p.id===id;});
+  if(a[0]) return a[0]; if(PLANOS_ANTIGOS[id]) return PLANOS_ANTIGOS[id]; return planos()[0]; }
+function planoAtualId(id){ if(planos().some(function(p){return p.id===id;})) return id;
+  if(id && /^1\./.test(id)) return '2.'+id.slice(2); return '2.1'; }
 function dayPlanoId(){ if(S.day&&S.day.planoId) return S.day.planoId;
-  try{ var l=localStorage.getItem('nutri.lastPlano'); if(l) return l; }catch(e){} return '1.1'; }
+  var l=null; try{ l=localStorage.getItem('nutri.lastPlano'); }catch(e){} return planoAtualId(l); }
 function planoDoDia(){ return planoById(dayPlanoId()); }
 function somaPadrao(plano,modo){
   var t={kcal:0,p:0,c:0,g:0};
   (plano.refeicoes||[]).forEach(function(m){ if(m.alternativa) return;
     var o=(m.opcoes||[])[0]; if(!o) return;
-    var v = modo==='banco' ? calcOpcao(o) : o.prescrito;
+    var v = (modo==='banco'||!o.prescrito) ? calcOpcao(o) : o.prescrito;
     t.kcal+=n(v.kcal); t.p+=n(v.p); t.c+=n(v.c); t.g+=n(v.g); });
   return t;
 }
@@ -693,7 +933,7 @@ async function setPeso(v){ var d=curDay(); d.peso=v===''?null:n(v); S.day=d; awa
 function novoRegistro(alimentoId,gramas,medidaTxt,refeicaoId,refeicaoNome,hora){
   var a=alim(alimentoId), m=macrosDe(alimentoId,gramas);
   return { id:uid(), refeicaoId:refeicaoId, refeicaoNome:refeicaoNome,
-    alimentoId:alimentoId, nome:a?a.nome:'Item', qtd:n(gramas), medida:medidaTxt||'',
+    alimentoId:alimentoId, nome:a?a.nome:'Item', qtd:n(gramas), un:(a&&a.por)?'porção':'g', medida:medidaTxt||((a&&a.por)?a.por:''),
     kcal:r1(m.kcal), p:r1(m.p), c:r1(m.c), g:r1(m.g), hora:hora||nowTime(), fonte:a?a.fonte:'' };
 }
 
@@ -712,9 +952,14 @@ function barHTML(val,target){
   var pct=target>0?Math.min(100,(val/target)*100):0, over=target>0&&val>target*1.05;
   return '<div class="bar '+(over?'over':'')+'"><i style="width:'+pct.toFixed(1)+'%"></i></div>';
 }
+function difTxt(val,target){
+  if(!target) return '';
+  var d=Math.round(n(val)-n(target));
+  return ' <span style="color:'+(d>0?'var(--warn)':'var(--muted)')+'">('+(d>0?'+ ':'- ')+Math.abs(d)+' g)</span>';
+}
 function macroBox(cls,label,val,target){
   return '<div class="macro '+cls+'"><div class="lbl">'+label+'</div>'
-   +'<div class="val">'+r0(val)+'<small> / '+r0(target)+' g</small></div>'+barHTML(val,target)+'</div>';
+   +'<div class="val">'+r0(val)+'<small> / '+r0(target)+' g'+difTxt(val,target)+'</small></div>'+barHTML(val,target)+'</div>';
 }
 
 /* ---------- ABA REGISTRO ---------- */
@@ -741,20 +986,23 @@ function viewRegistro(){
    +'</div></div>';
 
   var meals=(plano.refeicoes||[]).map(function(r){ return {id:r.id,nome:r.nome,plan:r}; });
+  var known={livre:1}; meals.forEach(function(m){ known[m.id]=1; });
+  regs.forEach(function(r){ if(r.refeicaoId && !known[r.refeicaoId]){ known[r.refeicaoId]=1;
+    meals.push({id:r.refeicaoId,nome:r.refeicaoNome||'Refeição',plan:null}); } });
   meals.push({id:'livre',nome:'Refeição livre / extras',plan:null});
 
   h+='<div class="sec-title"><h2>Refeições de '+esc(fmtDayLong(S.dateKey).toLowerCase())+'</h2><span class="hint">'+regs.length+' item(ns)</span></div>';
   h+='<div class="card">';
   meals.forEach(function(mm){
-    var rows=regs.filter(function(x){ return x.refeicaoId===mm.id; });
+    var rows=regs.filter(function(x){ return x.refeicaoId===mm.id || (mm.id==='livre' && !x.refeicaoId); });
     var tt=somaMacros(rows);
     h+='<div class="rmeal"><div class="rmeal-head"><b>'+esc(mm.nome)+(mm.plan&&mm.plan.alternativa?'<span class="tag">alternativa</span>':'')+'</b>'
-     +'<span class="k">'+(rows.length? r0(tt.kcal)+' kcal · P'+r1(tt.p)+' C'+r1(tt.c)+' G'+r1(tt.g) : '–')+'</span></div>';
+     +'<span class="k">'+(rows.length? r0(tt.kcal)+' kcal · P '+r1(tt.p)+' · C '+r1(tt.c)+' · G '+r1(tt.g) : '–')+'</span></div>';
     if(rows.length){
       h+='<ul class="rows">';
       rows.forEach(function(r){
-        h+='<li><span class="nm">'+esc(r.nome)+'<small>'+r1(r.qtd)+' g'+(r.medida?' · '+esc(r.medida):'')
-         +' · P'+r1(r.p)+' C'+r1(r.c)+' G'+r1(r.g)+'</small></span>'
+        h+='<li><span class="nm">'+esc(r.nome)+'<small>'+(r.un==='porção'?(r1(r.qtd)+'× '+esc(r.medida||'porção')):(r1(r.qtd)+' g'+(r.medida?' · '+esc(r.medida):'')))
+         +' · P '+r1(r.p)+' · C '+r1(r.c)+' · G '+r1(r.g)+'</small></span>'
          +'<span class="kc">'+r0(r.kcal)+'</span><button class="x" data-act="delRow" data-id="'+esc(r.id)+'">×</button></li>';
       });
       h+='</ul>';
@@ -767,15 +1015,6 @@ function viewRegistro(){
   });
   h+='</div>';
 
-  var agua=n(S.day&&S.day.agua);
-  h+='<div class="sec-title"><h2>Água e peso</h2></div>';
-  h+='<div class="card"><div class="water"><div class="wv">'+(agua/1000).toFixed(2).replace('.',',')
-   +' <small>/ '+(m.agua/1000).toFixed(1).replace('.',',')+' L</small>'+barHTML(agua,m.agua)+'</div><div class="grow"></div>'
-   +'<button class="mini" data-act="water" data-ml="250">+250</button>'
-   +'<button class="mini" data-act="water" data-ml="500">+500</button>'
-   +'<button class="mini" data-act="water" data-ml="-250">−250</button></div>'
-   +'<div class="field"><label>Peso do dia (kg)</label><input class="inp" type="number" step="0.1" inputmode="decimal" placeholder="opcional" value="'+(S.day&&S.day.peso!=null?S.day.peso:'')+'" data-act="peso"></div></div>';
-
   h+=histHTML();
   return h;
 }
@@ -783,20 +1022,27 @@ function viewRegistro(){
 function histHTML(){
   var keys=[]; for(var i=6;i>=0;i--) keys.push(shiftKey(todayKey(),-i));
   var byKey={}; S.hist.forEach(function(d){ byKey[d.data]=d; });
+  if(S.day&&S.day.data) byKey[S.day.data]=S.day;
   var rows=keys.map(function(k){ var d=byKey[k]||{data:k,registros:[]};
-    var p=planoById(d.planoId||'1.1');
+    var p=planoById(d.planoId||'2.1');
     return {k:k,d:d,t:dayTotals(d),meta:n(p.referencia.kcal),plano:p}; });
-  var max=1; rows.forEach(function(r){ max=Math.max(max,r.t.kcal,r.meta); });
-  var h='<div class="sec-title"><h2>Últimos 7 dias</h2><span class="hint">kcal por dia</span></div><div class="card"><div class="chart">';
+  var com=rows.filter(function(r){ return (r.d.registros||[]).length>0; });
+  var media = com.length ? com.reduce(function(a,r){ return a+r.t.kcal; },0)/com.length : 0;
+  var max=1; rows.forEach(function(r){ max=Math.max(max,r.t.kcal,r.meta); }); max=Math.max(max,media);
+  var h='<div class="sec-title"><h2>Últimos 7 dias</h2><span class="hint">kcal por dia</span></div><div class="card"><div class="chart"><div class="bars">';
   rows.forEach(function(r){
     var pct=(r.t.kcal/max)*100, over=r.meta&&r.t.kcal>r.meta*1.05;
-    h+='<div class="col"><div class="stack '+(over?'over':'')+'"><i style="height:'+pct.toFixed(1)+'%"></i></div>'
-     +'<div class="cl">'+keyToDate(r.k).toLocaleDateString('pt-BR',{weekday:'short'}).slice(0,3)+'</div></div>'; });
-  h+='</div>';
+    var temReg=(r.d.registros||[]).length>0, dif=r.meta?Math.round((r.t.kcal/r.meta-1)*100):0;
+    var lbl=temReg&&r.meta?'<b class="pctl" style="bottom:'+Math.min(pct,82).toFixed(1)+'%">'+(dif>0?'+':'')+dif+'%</b>':'';
+    h+='<div class="stack '+(over?'over':'')+'"><i style="height:'+pct.toFixed(1)+'%"></i>'+lbl+'</div>'; });
+  if(media>0) h+='<div class="avgline" style="bottom:'+((media/max)*100).toFixed(1)+'%"><span>média '+r0(media).toLocaleString('pt-BR')+' kcal</span></div>';
+  h+='</div><div class="labels">';
+  rows.forEach(function(r){ h+='<span>'+keyToDate(r.k).toLocaleDateString('pt-BR',{weekday:'short'}).slice(0,3)+'</span>'; });
+  h+='</div></div>';
   rows.slice().reverse().forEach(function(r){
     h+='<div class="hist-row"><div class="hd"><b>'+esc(fmtDayLong(r.k))+'</b><small>'+esc(r.plano.curto)+' · '
-     +((r.d.registros||[]).length)+' item(ns) · P'+r1(r.t.p)+' C'+r1(r.t.c)+' G'+r1(r.t.g)
-     +(r.d.peso!=null?' · '+r.d.peso+' kg':'')+'</small></div>'
+     +'P '+r1(r.t.p)+' · C '+r1(r.t.c)+' · G '+r1(r.t.g)
+     +'</small></div>'
      +'<div style="font-weight:600;font-size:13px;white-space:nowrap">'+r0(r.t.kcal)
      +'<span style="color:var(--muted);font-weight:500">/'+r0(r.meta)+'</span></div></div>'; });
   h+='</div>';
@@ -804,8 +1050,10 @@ function histHTML(){
 }
 
 /* ---------- ABA PLANOS ---------- */
+function subTxt(x){ if(typeof x==='string') return x; var a=alim(x.f); return (a?a.nome:x.f)+' – '+x.q; }
+function subsEstrut(item){ return (item.s||[]).filter(function(x){ return typeof x!=='string' && alim(x.f); }); }
 function viewPlanos(){
-  var plano=planoById(S.planoView);
+  var plano=planoById(planoAtualId(S.planoView));
   var h='<div class="plan-chips" style="margin-top:14px">';
   planos().forEach(function(p){
     h+='<button class="plan-chip" aria-pressed="'+(p.id===plano.id)+'" data-act="viewPlano" data-id="'+esc(p.id)+'">'
@@ -819,10 +1067,11 @@ function viewPlanos(){
 
   (plano.refeicoes||[]).forEach(function(ref2){
     var key=plano.id+'|'+ref2.id, sel=n(S.selOpt[key])||0;
-    var o=(ref2.opcoes||[])[sel]||{itens:[],prescrito:{}};
+    var o=(ref2.opcoes||[])[sel]||{itens:[],prescrito:null};
+    var mk=o.prescrito||calcOpcao(o), pref=o.prescrito?'':'≈ ';
     h+='<div class="card" style="margin-top:12px"><div class="meal"><div class="meal-head"><span class="meal-name">'+esc(ref2.nome)
      +(ref2.alternativa?'<span class="tag">alternativa</span>':'')+'</span>'
-     +'<span class="meal-kcal">'+r0(o.prescrito.kcal)+' kcal</span></div>';
+     +'<span class="meal-kcal">'+pref+r0(mk.kcal)+' kcal</span></div>';
     if((ref2.opcoes||[]).length>1){
       h+='<div class="pill-row">';
       ref2.opcoes.forEach(function(oo,i){
@@ -834,9 +1083,9 @@ function viewPlanos(){
       var a=alim(i2.f);
       h+='<li><div class="nm"><span class="a">'+esc(a?a.nome:i2.f)+'</span><span class="qtd">'+esc(i2.q)+'</span></div>'
        +((i2.s&&i2.s.length)?'<details class="subs"><summary>substituições</summary><ul>'
-          +i2.s.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></details>':'')+'</li>';
+          +i2.s.map(function(x){return '<li>'+esc(subTxt(x))+'</li>';}).join('')+'</ul></details>':'')+'</li>';
     });
-    h+='</ul><div class="mtot"><span><b>'+r0(o.prescrito.kcal)+' kcal</b> · P '+r1(o.prescrito.p)+' · C '+r1(o.prescrito.c)+' · G '+r1(o.prescrito.g)+' g</span></div>';
+    h+='</ul><div class="mtot"><span><b>'+pref+r0(mk.kcal)+' kcal</b> · P '+r1(mk.p)+' · C '+r1(mk.c)+' · G '+r1(mk.g)+' g'+(o.prescrito?'':' · calculado pelo banco de alimentos')+'</span></div>';
     if(o.obs) h+='<div class="obs">'+esc(o.obs)+'</div>';
     if(ref2.obs) h+='<div class="obs">'+esc(ref2.obs)+'</div>';
     h+='<div class="acts" style="padding-left:0;padding-bottom:0"><button class="mini pri" data-act="regOpcao" data-plano="'+esc(plano.id)+'" data-meal="'+esc(ref2.id)+'" data-i="'+sel+'">registrar hoje</button></div>';
@@ -887,23 +1136,29 @@ function renderBusca(){
   document.getElementById('fList').innerHTML = list.length ? list.map(function(a){
     return '<li data-act="pick" data-id="'+esc(a.id)+'"><span class="fn">'+esc(a.nome)
       +'<small>'+esc(a.cat)+'</small></span>'
-      +'<span class="fk">'+r0(a.kcal)+' kcal/100 g</span></li>'; }).join('')
+      +'<span class="fk">'+r0(a.kcal)+(a.por?' kcal / '+esc(a.por):' kcal/100 g')+'</span></li>'; }).join('')
     : '<li style="cursor:default"><span class="fn">Nada encontrado. Use “Criar alimento”.</span></li>';
 }
 function openQtd(alimentoId){
   var a=alim(alimentoId); if(!a) return;
-  var meds=[['gramas (g)',1]].concat(a.med.map(function(m){ return [m[0],m[1]]; }));
-  var defQtd = a.med.length ? 1 : 100;
+  var porcao=!!a.por;
+  var meds = porcao ? [[a.por,1]] : [['gramas (g)',1]].concat(a.med.map(function(m){ return [m[0],m[1]]; }));
+  var defQtd = porcao ? 1 : (a.med.length ? 1 : 100);
+  var selIdx = porcao ? 0 : (a.med.length ? 1 : 0);
+  var ref = porcao ? ('por porção ('+esc(a.por)+'): ') : 'por 100 g: ';
   var body='<div style="font-family:Fraunces,serif;font-size:17px">'+esc(a.nome)+'</div>'
-   +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">por 100 g: '+r0(a.kcal)+' kcal · P '+r1(a.p)+' · C '+r1(a.c)+' · G '+r1(a.g)+'</div>'
-   +'<div class="grid2"><div><label style="font-size:11px;color:var(--muted);font-weight:700">Quantidade</label>'
-   +'<input class="inp qq" id="qVal" type="number" step="0.1" inputmode="decimal" value="'+defQtd+'"></div>'
+   +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">'+ref+r0(a.kcal)+' kcal · P '+r1(a.p)+' · C '+r1(a.c)+' · G '+r1(a.g)+'</div>'
+   +'<div class="grid2"><div><label style="font-size:11px;color:var(--muted);font-weight:700">'+(porcao?'Nº de porções':'Quantidade')+'</label>'
+   +'<input class="inp qq" id="qVal" type="number" step="'+(porcao?'0.5':'0.1')+'" inputmode="decimal" value="'+defQtd+'"></div>'
    +'<div><label style="font-size:11px;color:var(--muted);font-weight:700">Medida</label>'
-   +'<select class="inp qq" id="qMed">'+meds.map(function(m,i){ return '<option value="'+m[1]+'" data-lbl="'+esc(m[0])+'"'+(i===(a.med.length?1:0)?' selected':'')+'>'+esc(m[0])+'</option>'; }).join('')+'</select></div></div>'
+   +'<select class="inp qq" id="qMed"'+(porcao?' disabled':'')+'>'+meds.map(function(m,i){ return '<option value="'+m[1]+'" data-lbl="'+esc(m[0])+'"'+(i===selIdx?' selected':'')+'>'+esc(m[0])+'</option>'; }).join('')+'</select></div></div>'
    +'<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Refeição</label>'
    +'<select class="inp" id="qMeal">'+mealOptionsHTML(S.busca.meal)+'</select></div>'
    +'<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Horário</label>'
-   +'<input class="inp" id="qHora" type="time" value="'+nowTime()+'"></div>';
+   +'<input class="inp" id="qHora" type="time" value="'+nowTime()+'"></div>'
+   +'<div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">'
+   +'<button class="mini" data-act="editAlim" data-id="'+esc(a.id)+'">Editar alimento</button>'
+   +'<button class="mini" data-act="delAlim" data-id="'+esc(a.id)+'">Excluir do banco</button></div>';
   document.getElementById('sheetHost').innerHTML = sheet('Quantidade', body,
     '<div class="tot" id="qTot"></div><button class="btn" data-act="addQtd" data-id="'+esc(a.id)+'">Adicionar</button>');
   updQtd();
@@ -924,8 +1179,8 @@ function qtdGramas(){
 function updQtd(){
   var host=document.getElementById('qTot'); if(!host) return;
   var id=document.querySelector('[data-act="addQtd"]').dataset.id;
-  var m=macrosDe(id,qtdGramas());
-  host.innerHTML='<b>'+r0(m.kcal)+' kcal</b> · '+r1(qtdGramas())+' g<br>P '+r1(m.p)+' · C '+r1(m.c)+' · G '+r1(m.g);
+  var m=macrosDe(id,qtdGramas()), a=alim(id);
+  host.innerHTML='<b>'+r0(m.kcal)+' kcal</b> · '+r1(qtdGramas())+(a&&a.por?' porção(ões)':' g')+'<br>P '+r1(m.p)+' · C '+r1(m.c)+' · G '+r1(m.g);
 }
 
 /* --- registrar opção do plano --- */
@@ -939,16 +1194,25 @@ function openOpcaoPlano(mealId,forcePlanoId,forceIdx){
     body+='<div class="pill-row" style="margin-top:0">'+ref.opcoes.map(function(oo,i){
       return '<button class="pill" aria-pressed="'+(i===sel)+'" data-act="opPlanoSel" data-meal="'+esc(ref.id)+'" data-i="'+i+'">'+esc(oo.nome)+'</button>'; }).join('')+'</div>';
   }
-  body+='<div style="font-size:11.5px;color:var(--muted);margin:10px 0 4px">Desmarque o que não comeu e ajuste as gramas.</div>';
+  body+='<div style="font-size:11.5px;color:var(--muted);margin:10px 0 4px">Desmarque o que não comeu, ajuste as quantidades e use ⇄ para trocar por um substituto.</div>';
   (o.itens||[]).forEach(function(i2,idx){
-    var a=alim(i2.f);
-    body+='<div style="display:flex;gap:9px;align-items:center;padding:7px 0;border-top:1px solid var(--line)">'
-     +'<input type="checkbox" class="opChk" data-i="'+idx+'" checked style="width:18px;height:18px;accent-color:var(--accent)">'
-     +'<div style="flex:1;min-width:0"><div style="font-size:13.5px">'+esc(a?a.nome:i2.f)+'</div>'
-     +'<div style="font-size:11px;color:var(--muted)">'+esc(i2.q)+'</div></div>'
-     +'<input class="inp opG" data-i="'+idx+'" type="number" step="0.5" value="'+i2.g+'" style="width:78px;text-align:right;padding:6px 8px">'
-     +'<span style="font-size:11px;color:var(--muted)">g</span></div>';
+    var a=alim(i2.f), por=a&&a.por;
+    var se=subsEstrut(i2), st=(i2.s||[]).filter(function(x){ return typeof x==='string'; });
+    body+='<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="display:flex;gap:9px;align-items:center">'
+     +'<input type="checkbox" class="opChk" data-i="'+idx+'" data-f="'+esc(i2.f)+'"'+(n(i2.g)>0?' checked':'')+' style="width:18px;height:18px;accent-color:var(--accent);flex:none">'
+     +'<div style="flex:1;min-width:0"><div style="font-size:13.5px" class="opNm" data-i="'+idx+'">'+esc(a?a.nome:i2.f)+'</div>'
+     +'<div style="font-size:11px;color:var(--muted)" class="opQ" data-i="'+idx+'">'+esc(i2.q)+'</div></div>'
+     +'<input class="inp opG" data-i="'+idx+'" type="number" step="'+(por?'0.5':'1')+'" value="'+i2.g+'" style="width:74px;text-align:right;padding:6px 8px">'
+     +'<span class="opU" data-i="'+idx+'" style="font-size:11px;color:var(--muted);width:40px">'+(por?'porção':'g')+'</span></div>';
+    if(se.length){
+      body+='<select class="inp opSub" data-i="'+idx+'" style="margin-top:6px;font-size:12.5px;padding:6px 8px">'
+       +'<option value="">Como no plano</option>'
+       +se.map(function(x,k){ return '<option value="'+k+'">⇄ '+esc(subTxt(x))+'</option>'; }).join('')+'</select>';
+    }
+    if(st.length) body+='<div style="font-size:11px;color:var(--muted);margin-top:4px">⇄ '+st.map(esc).join(' · ')+'</div>';
+    body+='</div>';
   });
+  if(o.obs) body+='<div class="obs">'+esc(o.obs)+'</div>';
   body+='<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Horário</label>'
    +'<input class="inp" id="opHora" type="time" value="'+nowTime()+'"></div>';
   document.getElementById('sheetHost').innerHTML = sheet(esc(ref.nome), body,
@@ -965,8 +1229,8 @@ function opSelecao(){
   Array.prototype.forEach.call(host.querySelectorAll('.opChk'),function(cb){
     if(!cb.checked) return;
     var i=+cb.dataset.i, item=(o.itens||[])[i]; if(!item) return;
-    var gi=host.querySelector('.opG[data-i="'+i+'"]');
-    out.push({f:item.f, g:gi?n(gi.value):item.g});
+    var gi=host.querySelector('.opG[data-i="'+i+'"]'), g=gi?n(gi.value):item.g;
+    if(g>0) out.push({f:cb.dataset.f||item.f, g:g});
   });
   return out;
 }
@@ -991,12 +1255,31 @@ function openNovoAlimento(){
     '<div class="tot">Fica salvo no seu banco.</div><button class="btn" data-act="salvarAlimento">Salvar</button>');
 }
 
+function alimNoPlano(id){
+  return planos().some(function(p){ return (p.refeicoes||[]).some(function(m){ return (m.opcoes||[]).some(function(o){
+    return (o.itens||[]).some(function(i){ return i.f===id || (i.s||[]).some(function(x){ return typeof x!=='string' && x.f===id; }); }); }); }); });
+}
+function openEditarAlimento(id){
+  var a=alim(id); if(!a) return;
+  var base = a.por ? ('por porção ('+esc(a.por)+')') : 'por 100 g';
+  var body='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Valores <b>'+base+'</b>.</div>'
+   +'<label style="font-size:11px;color:var(--muted);font-weight:700">Nome</label><input class="inp" id="eaNome" value="'+esc(a.nome)+'">'
+   +'<div class="grid4" style="margin-top:10px">'
+   +'<div><input class="inp" id="eaKcal" type="number" value="'+n(a.kcal)+'"><div style="font-size:10px;color:var(--muted);text-align:center">kcal</div></div>'
+   +'<div><input class="inp" id="eaP" type="number" step="0.1" value="'+n(a.p)+'"><div style="font-size:10px;color:var(--muted);text-align:center">prot</div></div>'
+   +'<div><input class="inp" id="eaC" type="number" step="0.1" value="'+n(a.c)+'"><div style="font-size:10px;color:var(--muted);text-align:center">carb</div></div>'
+   +'<div><input class="inp" id="eaG" type="number" step="0.1" value="'+n(a.g)+'"><div style="font-size:10px;color:var(--muted);text-align:center">gord</div></div></div>'
+   +(a.por?'<div style="margin-top:10px"><label style="font-size:11px;color:var(--muted);font-weight:700">Porção</label><input class="inp" id="eaPor" value="'+esc(a.por)+'"></div>':'')
+   +'<div style="margin-top:10px"><label style="font-size:11px;color:var(--muted);font-weight:700">Categoria</label>'
+   +'<input class="inp" id="eaCat" value="'+esc(a.cat)+'"></div>';
+  document.getElementById('sheetHost').innerHTML = sheet('Editar alimento', body,
+    '<div class="tot">Registros já feitos não mudam.</div><button class="btn" data-act="salvarEdicao" data-id="'+esc(a.id)+'">Salvar</button>');
+}
+
 /* --- ajustes --- */
 function openAjustes(){
   var cfg=(S.base&&S.base.config)||{};
-  var body='<label style="font-size:11px;color:var(--muted);font-weight:700">Meta de água (ml/dia)</label>'
-   +'<input class="inp" id="cfgAgua" type="number" value="'+(n(cfg.agua)||2500)+'">'
-   +'<div style="margin-top:14px"><label style="font-size:11px;color:var(--muted);font-weight:700">Base da meta diária</label>'
+  var body='<div><label style="font-size:11px;color:var(--muted);font-weight:700">Base da meta diária</label>'
    +'<select class="inp" id="cfgBase">'
    +'<option value="prescricao"'+(cfg.baseMeta!=='banco'?' selected':'')+'>Prescrição (macros impressos no PDF)</option>'
    +'<option value="banco"'+(cfg.baseMeta==='banco'?' selected':'')+'>Banco de alimentos (soma das 1ªs opções)</option>'
@@ -1009,7 +1292,7 @@ function openAjustes(){
    +'<button class="mini" data-act="wipeDay">Limpar o dia</button></div>'
    +'<div style="margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.55">'
    +'Armazenamento: <b style="color:var(--text)">'+(S.backend==='db'?'nuvem do artefato':'localStorage deste navegador')+'</b>.<br><br>'
-   +'<b style="color:var(--text)">Sobre os valores nutricionais:</b> o banco traz valores de referência por 100 g, vindos de tabela de composição de alimentos, de rótulos de produtos e de estimativas para preparações compostas. Não foram conferidos em fonte oficial: confira o rótulo dos produtos de marca que você usa sempre e, se precisar corrigir algum, crie uma versão sua pelo botão "Criar alimento".</div>';
+   +'<b style="color:var(--text)">Sobre os valores nutricionais:</b> Livup e os iogurtes Danone e Batavo seguem os rótulos oficiais; Ri Hi segue a planilha que você enviou; a comida de rua vem da tabela do seu nutricionista; bolos, cheesecakes, cookie e mousse seguem referências genéricas de bancos nutricionais; alimentos básicos seguem a TACO. Algumas preparações (peças japonesas extras, lanches de rua adicionais, pratos caseiros) são estimativas. Para corrigir qualquer item, crie uma versão sua pelo botão "Criar alimento".</div>';
   document.getElementById('sheetHost').innerHTML = sheet('Ajustes', body,
     '<div class="tot"></div><button class="btn" data-act="saveCfg">Salvar</button>');
 }
@@ -1043,7 +1326,7 @@ function toast(msg){
    ========================================================================== */
 document.addEventListener('click',function(ev){
   var tab=ev.target.closest('.tab');
-  if(tab){ S.tab=tab.dataset.tab; if(S.tab==='planos') S.planoView=dayPlanoId();
+  if(tab){ S.tab=tab.dataset.tab; if(S.tab==='planos') S.planoView=planoAtualId(dayPlanoId());
     else Store.allDays(30).then(function(d){ S.hist=d; render(); });
     render(); window.scrollTo(0,0); return; }
 
@@ -1082,7 +1365,9 @@ document.addEventListener('click',function(ev){
     var mid=document.getElementById('qMeal').value;
     var medSel=document.getElementById('qMed'), medLbl=medSel.options[medSel.selectedIndex].dataset.lbl;
     var qv=document.getElementById('qVal').value;
-    addRows([ novoRegistro(el.dataset.id,g, n(medSel.value)===1?'':(qv+' '+medLbl), mid, mealNome(mid), document.getElementById('qHora').value) ]);
+    var aa=alim(el.dataset.id);
+    var medTxt = (aa&&aa.por) ? aa.por : (n(medSel.value)===1?'':(qv+' '+medLbl));
+    addRows([ novoRegistro(el.dataset.id,g, medTxt, mid, mealNome(mid), document.getElementById('qHora').value) ]);
     closeSheet(); return;
   }
   if(act==='addOpcao'){
@@ -1091,6 +1376,31 @@ document.addEventListener('click',function(ev){
     var mid2=el.dataset.meal, hora=document.getElementById('opHora').value;
     addRows(sel.map(function(x){ return novoRegistro(x.f,x.g,'',mid2,mealNome(mid2),hora); }));
     closeSheet(); return;
+  }
+  if(act==='editAlim'){ openEditarAlimento(el.dataset.id); return; }
+  if(act==='salvarEdicao'){
+    var orig=alim(el.dataset.id); if(!orig) return;
+    var nm=(document.getElementById('eaNome').value||'').trim(); if(!nm){ toast('Dê um nome ao alimento.'); return; }
+    var ed=JSON.parse(JSON.stringify(orig));
+    ed.nome=nm; ed.kcal=n(document.getElementById('eaKcal').value); ed.p=n(document.getElementById('eaP').value);
+    ed.c=n(document.getElementById('eaC').value); ed.g=n(document.getElementById('eaG').value);
+    ed.cat=(document.getElementById('eaCat').value||orig.cat).trim();
+    var ep=document.getElementById('eaPor'); if(ep) ed.por=ep.value||orig.por;
+    ed.fonte='meu';
+    var bE=JSON.parse(JSON.stringify(S.base)); bE.alimentosCustom=(bE.alimentosCustom||[]).filter(function(x){ return x.id!==ed.id; });
+    bE.alimentosCustom.push(ed);
+    Store.saveBase(bE).then(function(){ toast('Alimento atualizado.'); openQtd(ed.id); });
+    return;
+  }
+  if(act==='delAlim'){
+    var idD=el.dataset.id;
+    if(alimNoPlano(idD)){ toast('Esse alimento faz parte do plano: dá para editar, mas não excluir.'); return; }
+    if(el.dataset.ok!=='1'){ el.dataset.ok='1'; el.textContent='Toque de novo para excluir'; el.style.color='var(--danger)'; return; }
+    var bD=JSON.parse(JSON.stringify(S.base));
+    bD.alimentosCustom=(bD.alimentosCustom||[]).filter(function(x){ return x.id!==idD; });
+    if(ALIM_BASE.some(function(x){ return x.id===idD; })){ bD.alimentosOcultos=(bD.alimentosOcultos||[]); if(bD.alimentosOcultos.indexOf(idD)<0) bD.alimentosOcultos.push(idD); }
+    Store.saveBase(bD).then(function(){ toast('Alimento excluído do banco.'); openBusca(S.busca.meal); });
+    return;
   }
   if(act==='salvarAlimento'){
     var nome=(document.getElementById('naNome').value||'').trim();
@@ -1106,7 +1416,6 @@ document.addEventListener('click',function(ev){
   if(act==='saveCfg'){
     var b2=S.base?JSON.parse(JSON.stringify(S.base)):basePadrao();
     b2.config=b2.config||{};
-    b2.config.agua=n(document.getElementById('cfgAgua').value)||2500;
     b2.config.baseMeta=document.getElementById('cfgBase').value;
     Store.saveBase(b2).then(function(){ toast('Salvo.'); closeSheet(); });
     return;
@@ -1126,6 +1435,19 @@ document.addEventListener('click',function(ev){
 
 document.addEventListener('input',function(){ if(document.getElementById('opTot')) updOpTot(); });
 document.addEventListener('change',function(ev){
+  if(ev.target.classList && ev.target.classList.contains('opSub')){
+    var host=document.getElementById('sheetHost'), btn=host.querySelector('[data-act="addOpcao"]');
+    var pl=planoById(btn.dataset.plano), rf=(pl.refeicoes||[]).filter(function(x){return x.id===btn.dataset.meal;})[0];
+    var op=(rf.opcoes||[])[+btn.dataset.i], idx=+ev.target.dataset.i, item=op.itens[idx];
+    var f=item.f, g=item.g, q=item.q, v=ev.target.value;
+    if(v!==''){ var sx=subsEstrut(item)[+v]; f=sx.f; g=sx.g; q=sx.q; }
+    var aa=alim(f), cb=host.querySelector('.opChk[data-i="'+idx+'"]');
+    cb.dataset.f=f; if(n(g)>0) cb.checked=true;
+    host.querySelector('.opG[data-i="'+idx+'"]').value=g;
+    host.querySelector('.opNm[data-i="'+idx+'"]').textContent=aa?aa.nome:f;
+    host.querySelector('.opQ[data-i="'+idx+'"]').textContent=q;
+    host.querySelector('.opU[data-i="'+idx+'"]').textContent=(aa&&aa.por)?'porção':'g';
+  }
   if(ev.target.dataset&&ev.target.dataset.act==='peso') setPeso(ev.target.value);
   if(document.getElementById('opTot')) updOpTot();
 });
@@ -1137,6 +1459,19 @@ document.getElementById('themeBtn').addEventListener('click',function(){
 });
 try{ var th=localStorage.getItem('nutri.theme'); if(th) document.documentElement.setAttribute('data-theme',th); }catch(e){}
 
+/* backup embutido: dias que ainda não existirem neste aparelho são criados a partir daqui */
+var SEED_BACKUP = {"exportadoEm":"2026-10-01T20:24:58.922Z","dias":[{"data":"2026-10-01","planoId":"1.1","registros":[{"id":"mupgujki4w4lk","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"queijo-minas-padrao","nome":"Queijo minas padrão","qtd":40,"medida":"","kcal":128.4,"p":9.1,"c":0.6,"g":10,"hora":"08:43","fonte":"TACO"},{"id":"mupguprpobglw","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"pao-frances","nome":"Pão francês","qtd":50,"medida":"1 unidade","kcal":150,"p":4,"c":29.3,"g":1.6,"hora":"08:43","fonte":"TACO"},{"id":"mupgvpkfovpcg","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"cust-mupgvkb7cajl7","nome":"Natural Whey Verde Campo","qtd":100,"medida":"","kcal":139,"p":14,"c":18,"g":1,"hora":"08:44","fonte":"meu"},{"id":"muprgrqajhx5y","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-muprgm2569cfx","nome":"Almoço Elvira arroz de frango","qtd":100,"medida":"","kcal":1500,"p":80,"c":165,"g":60,"hora":"13:41","fonte":"meu"}],"agua":0,"peso":null},{"data":"2026-09-30","planoId":"1.3","registros":[{"id":"muo239qjia7w1","refeicaoId":"intra-treino","refeicaoNome":"Intra-treino","alimentoId":"goiabada","nome":"Goiabada","qtd":25,"medida":"","kcal":67.5,"p":0.2,"c":16.8,"g":0,"hora":"09:02","fonte":"TACO"},{"id":"muoa964v5o6ib","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"iogurte-batavo-morango-zero","nome":"Iogurte Batavo Morango Zero","qtd":400,"medida":"","kcal":188,"p":13.6,"c":24.4,"g":6,"hora":"12:50","fonte":"rótulo"},{"id":"muoa964v4u4o8","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"chia","nome":"Semente de chia","qtd":5,"medida":"","kcal":24.3,"p":0.8,"c":2.1,"g":1.5,"hora":"12:50","fonte":"estimativa"},{"id":"muoa964vmhhd4","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"aveia","nome":"Aveia em flocos","qtd":7,"medida":"","kcal":27.6,"p":1,"c":4.7,"g":0.6,"hora":"12:50","fonte":"TACO"},{"id":"muoa9cxewilzb","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":7.5,"medida":"","kcal":28.5,"p":6,"c":0.5,"g":0.3,"hora":"12:51","fonte":"rótulo"},{"id":"muoa9s5549iwb","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"maca","nome":"Maçã com casca","qtd":80,"medida":"","kcal":44.8,"p":0.2,"c":12.2,"g":0.1,"hora":"12:51","fonte":"TACO"},{"id":"muoabuxr9zy98","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"cust-muoabfv8mdgwt","nome":"Marmita Livup Frango Oriental","qtd":100,"medida":"","kcal":348,"p":30,"c":33,"g":0,"hora":"12:53","fonte":"meu"},{"id":"muoacdw8u90mk","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"cust-muoac7dlg3dda","nome":"Gordura marmita livup frango oriental","qtd":100,"medida":"","kcal":0,"p":0,"c":0,"g":11,"hora":"12:54","fonte":"meu"},{"id":"muohuvksc97mv","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":40,"medida":"","kcal":152,"p":32,"c":2.8,"g":1.8,"hora":"16:22","fonte":"rótulo"},{"id":"muoir6m9n6m01","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"16:49","fonte":"rótulo"},{"id":"muoirb0h4d6jm","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"16:49","fonte":"estimativa"},{"id":"muoy9bc5aob2d","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-muoy8usyy0brx","nome":"Jantar Preta Maria","qtd":100,"medida":"","kcal":1460,"p":22,"c":213,"g":58,"hora":"22:03","fonte":"meu"}],"agua":0,"peso":null},{"data":"2026-09-29","planoId":"1.3","registros":[{"id":"mumms97v5qpuq","refeicaoId":"intra-treino","refeicaoNome":"Intra-treino","alimentoId":"goiabada","nome":"Goiabada","qtd":25,"medida":"","kcal":67.5,"p":0.2,"c":16.8,"g":0,"hora":"09:06","fonte":"TACO"},{"id":"mumn84itaqf97","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"09:06","fonte":"rótulo"},{"id":"mumn84iuqxtsp","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"chia","nome":"Semente de chia","qtd":10,"medida":"","kcal":48.6,"p":1.7,"c":4.2,"g":3.1,"hora":"09:06","fonte":"estimativa"},{"id":"mumn84iu4z2hx","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"aveia","nome":"Aveia em flocos","qtd":22.5,"medida":"","kcal":88.7,"p":3.1,"c":15,"g":1.9,"hora":"09:06","fonte":"TACO"},{"id":"mumn84iurj2eg","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":7.5,"medida":"","kcal":28.5,"p":6,"c":0.5,"g":0.3,"hora":"09:06","fonte":"rótulo"},{"id":"mumn8csz8890l","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"maca","nome":"Maçã com casca","qtd":80,"medida":"","kcal":44.8,"p":0.2,"c":12.2,"g":0.1,"hora":"09:19","fonte":"TACO"},{"id":"mumu8no3qmru5","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"arroz-integral","nome":"Arroz integral cozido","qtd":110,"medida":"","kcal":136.4,"p":2.9,"c":28.4,"g":1.1,"hora":"12:35","fonte":"TACO"},{"id":"mumu8no3qwzf4","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"feijao-preto","nome":"Feijão preto cozido","qtd":100,"medida":"","kcal":77,"p":4.5,"c":14,"g":0.5,"hora":"12:35","fonte":"TACO"},{"id":"mumu8no3494nt","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"salada-folhas","nome":"Salada de folhas (alface, rúcula, agrião)","qtd":150,"medida":"","kcal":24,"p":2.1,"c":3.5,"g":0.3,"hora":"12:35","fonte":"TACO"},{"id":"mumu8zz66n9g0","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"cust-mufj32fmry86r","nome":"Frango Durum","qtd":80,"medida":"","kcal":156,"p":26.4,"c":1.6,"g":4,"hora":"12:35","fonte":"meu"},{"id":"mun128vy0nzze","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"15:45","fonte":"estimativa"},{"id":"mun1jqxifl951","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"pao-queijo","nome":"Pão de queijo","qtd":30,"medida":"1 unidade","kcal":88.5,"p":1.5,"c":9,"g":5.1,"hora":"16:00","fonte":"estimativa"},{"id":"muna7z3mnuec9","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-muna7ma72guvg","nome":"Jantar Yuna","qtd":100,"medida":"","kcal":1400,"p":85,"c":130,"g":60,"hora":"20:02","fonte":"meu"}],"agua":0,"peso":null},{"data":"2026-09-28","planoId":"1.1","registros":[{"id":"mul3g7sbbrg1v","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"psyllium","nome":"Psyllium","qtd":5,"medida":"","kcal":1.8,"p":0.1,"c":0.4,"g":0,"hora":"07:17","fonte":"rótulo"},{"id":"mul3gjqh13izo","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"frango-grelhado","nome":"Peito de frango grelhado","qtd":80,"medida":"","kcal":127.2,"p":25.6,"c":0,"g":2,"hora":"07:17","fonte":"TACO"},{"id":"mul3gjqh9u00g","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"arroz-integral","nome":"Arroz integral cozido","qtd":110,"medida":"","kcal":136.4,"p":2.9,"c":28.4,"g":1.1,"hora":"07:17","fonte":"TACO"},{"id":"mul3gjqio6xd1","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"feijao-preto","nome":"Feijão preto cozido","qtd":80,"medida":"","kcal":61.6,"p":3.6,"c":11.2,"g":0.4,"hora":"07:17","fonte":"TACO"},{"id":"mulep9e9rwqr4","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"chia","nome":"Semente de chia","qtd":10,"medida":"","kcal":48.6,"p":1.7,"c":4.2,"g":3.1,"hora":"12:32","fonte":"estimativa"},{"id":"mulep9ea3iyod","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"12:32","fonte":"estimativa"},{"id":"mulep9eagubzs","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"aveia","nome":"Aveia em flocos","qtd":15,"medida":"","kcal":59.1,"p":2.1,"c":10,"g":1.3,"hora":"12:32","fonte":"TACO"},{"id":"mulepdv2c1iks","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":7.5,"medida":"","kcal":28.5,"p":6,"c":0.5,"g":0.3,"hora":"12:32","fonte":"rótulo"},{"id":"mulevj57apbcw","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"12:37","fonte":"estimativa"},{"id":"mulevj582cz79","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"aveia","nome":"Aveia em flocos","qtd":20,"medida":"","kcal":78.8,"p":2.8,"c":13.3,"g":1.7,"hora":"12:37","fonte":"TACO"},{"id":"mulms8kaoseoy","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"iogurte-batavo-morango-zero","nome":"Iogurte Batavo Morango Zero","qtd":200,"medida":"","kcal":94,"p":6.8,"c":12.2,"g":3,"hora":"16:18","fonte":"rótulo"},{"id":"mulmsqew3du7r","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"16:19","fonte":"rótulo"},{"id":"mulmt6il35kpu","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"chia","nome":"Semente de chia","qtd":10,"medida":"","kcal":48.6,"p":1.7,"c":4.2,"g":3.1,"hora":"16:19","fonte":"estimativa"},{"id":"mulynucafrxfh","refeicaoId":"jantar-calorico","refeicaoNome":"Jantar calórico (sem ceia)","alimentoId":"cust-mulynm74la336","nome":"Bowl Durum Arroz+Baba","qtd":100,"medida":"","kcal":791,"p":40,"c":114,"g":15,"hora":"21:51","fonte":"meu"}],"agua":0,"peso":null},{"data":"2026-09-27","planoId":"1.3","registros":[{"id":"mujjxqes88z4g","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"pao-frances","nome":"Pão francês","qtd":50,"medida":"1 unidade","kcal":150,"p":4,"c":29.3,"g":1.6,"hora":"05:23","fonte":"TACO"},{"id":"mujjy5brq92jb","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"queijo-minas","nome":"Queijo minas frescal","qtd":50,"medida":"","kcal":132,"p":8.7,"c":1.6,"g":10.1,"hora":"05:23","fonte":"TACO"},{"id":"mujurj0zjee9h","refeicaoId":"intra-treino","refeicaoNome":"Intra-treino","alimentoId":"goiabada","nome":"Goiabada","qtd":25,"medida":"","kcal":67.5,"p":0.2,"c":16.8,"g":0,"hora":"10:26","fonte":"TACO"},{"id":"mukhjthwjvw1z","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-mukhjjozd3hyd","nome":"Almoço Praça São Lourenço","qtd":100,"medida":"","kcal":2935,"p":124,"c":320,"g":130,"hora":"21:04","fonte":"meu"}],"agua":0,"peso":null},{"data":"2026-09-26","planoId":"1.1","registros":[{"id":"muipvvle73l6y","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"pao-queijo","nome":"Pão de queijo","qtd":30,"medida":"1 unidade","kcal":88.5,"p":1.5,"c":9,"g":5.1,"hora":"15:22","fonte":"estimativa"},{"id":"muipwgkmo9bzp","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"chocolate-70","nome":"Chocolate 70% cacau","qtd":25,"medida":"","kcal":142.5,"p":2,"c":8.5,"g":10.5,"hora":"15:22","fonte":"estimativa"},{"id":"muipwv2jofdpf","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"queijo-minas-padrao","nome":"Queijo minas padrão","qtd":30,"medida":"1 fatia","kcal":96.3,"p":6.8,"c":0.5,"g":7.5,"hora":"15:23","fonte":"TACO"},{"id":"muipy0qtvlwd1","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-muipxrxp8g5el","nome":"Brunch Bachour","qtd":100,"medida":"","kcal":1650,"p":33,"c":195,"g":85,"hora":"15:24","fonte":"meu"},{"id":"muix74sw5474r","refeicaoId":"jantar","refeicaoNome":"Jantar normal","alimentoId":"atum-agua","nome":"Atum em conserva em água (drenado)","qtd":200,"medida":"","kcal":232,"p":52,"c":0,"g":2,"hora":"18:46","fonte":"rótulo"},{"id":"muix7fhccpn5n","refeicaoId":"jantar","refeicaoNome":"Jantar normal","alimentoId":"salada-folhas","nome":"Salada de folhas (alface, rúcula, agrião)","qtd":160,"medida":"2 prato","kcal":25.6,"p":2.2,"c":3.7,"g":0.3,"hora":"18:47","fonte":"TACO"},{"id":"muix7v1ntxyve","refeicaoId":"jantar","refeicaoNome":"Jantar normal","alimentoId":"cust-muhihjj8ramsz","nome":"Gari","qtd":25,"medida":"","kcal":20,"p":0.3,"c":5,"g":0,"hora":"18:47","fonte":"meu"},{"id":"muix86x4sse9l","refeicaoId":"jantar","refeicaoNome":"Jantar normal","alimentoId":"hortalicas-cruas","nome":"Hortaliças cruas variadas (tomate, pepino, cenoura)","qtd":100,"medida":"","kcal":20,"p":0.9,"c":4.4,"g":0.1,"hora":"18:48","fonte":"estimativa"},{"id":"muiy4q1ngvl3l","refeicaoId":"jantar","refeicaoNome":"Jantar normal","alimentoId":"shoyu","nome":"Molho shoyu","qtd":30,"medida":"2 colher de sopa","kcal":18,"p":1.8,"c":2.4,"g":0,"hora":"19:13","fonte":"rótulo"}],"agua":0,"peso":null},{"data":"2026-09-25","planoId":"1.1","registros":[{"id":"mugilrij9zeed","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"salada-folhas","nome":"Salada de folhas (alface, rúcula, agrião)","qtd":50,"medida":"","kcal":8,"p":0.7,"c":1.2,"g":0.1,"hora":"02:22","fonte":"TACO"},{"id":"mugilrijicfk3","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"hortalicas-cruas","nome":"Hortaliças cruas variadas (tomate, pepino, cenoura)","qtd":100,"medida":"","kcal":20,"p":0.9,"c":4.4,"g":0.1,"hora":"02:22","fonte":"estimativa"},{"id":"mugurzv3q5uai","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"ovo-cozido","nome":"Ovo de galinha cozido","qtd":100,"medida":"","kcal":146,"p":13.3,"c":0.6,"g":9.5,"hora":"08:03","fonte":"TACO"},{"id":"mugurzv3a9ie5","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"pao-frances","nome":"Pão francês","qtd":40,"medida":"","kcal":120,"p":3.2,"c":23.4,"g":1.2,"hora":"08:03","fonte":"TACO"},{"id":"mugushftmt9vj","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"cust-mufj32fmry86r","nome":"Frango Durum","qtd":100,"medida":"","kcal":195,"p":33,"c":2,"g":5,"hora":"08:04","fonte":"meu"},{"id":"mugusq1k2qgt7","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"arroz-branco","nome":"Arroz branco cozido","qtd":200,"medida":"","kcal":256,"p":5,"c":56.2,"g":0.4,"hora":"08:04","fonte":"TACO"},{"id":"muhck0pwrnp4i","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"16:21","fonte":"rótulo"},{"id":"muhck0pw0z971","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"chia","nome":"Semente de chia","qtd":10,"medida":"","kcal":48.6,"p":1.7,"c":4.2,"g":3.1,"hora":"16:21","fonte":"estimativa"},{"id":"muhck0pxmqxfc","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"16:21","fonte":"estimativa"},{"id":"muhckomswa2wc","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"aveia","nome":"Aveia em flocos","qtd":22.5,"medida":"","kcal":88.7,"p":3.1,"c":15,"g":1.9,"hora":"16:21","fonte":"TACO"},{"id":"muhifuoc19hi8","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"cust-muhi4qd7ecnk6","nome":"Wasabi","qtd":50,"medida":"","kcal":15,"p":0.5,"c":1.5,"g":0.1,"hora":"19:05","fonte":"meu"},{"id":"muhihu8khpq2k","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"cust-muhihjj8ramsz","nome":"Gari","qtd":40,"medida":"","kcal":32,"p":0.4,"c":8,"g":0,"hora":"19:07","fonte":"meu"},{"id":"muipz73o80s5g","refeicaoId":"jantar-calorico","refeicaoNome":"Jantar calórico (sem ceia)","alimentoId":"cust-muipz1cmrjd8u","nome":"Olga Ri Fusili Legumes Frango Crocante","qtd":100,"medida":"","kcal":616,"p":33,"c":97,"g":11,"hora":"15:25","fonte":"meu"}],"agua":0,"peso":null},{"data":"2026-09-24","planoId":"1.3","registros":[{"id":"mufj24jbkyn2x","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"ovo-cozido","nome":"Ovo de galinha cozido","qtd":100,"medida":"","kcal":146,"p":13.3,"c":0.6,"g":9.5,"hora":"09:48","fonte":"TACO"},{"id":"mufj24jbnwnze","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"pao-frances","nome":"Pão francês","qtd":50,"medida":"","kcal":150,"p":4,"c":29.3,"g":1.6,"hora":"09:48","fonte":"TACO"},{"id":"mufj3udazaxq8","refeicaoId":"intra-treino","refeicaoNome":"Intra-treino","alimentoId":"goiabada","nome":"Goiabada","qtd":25,"medida":"","kcal":67.5,"p":0.2,"c":16.8,"g":0,"hora":"09:49","fonte":"TACO"},{"id":"mufjvwopmxbqc","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"arroz-integral","nome":"Arroz integral cozido","qtd":165,"medida":"","kcal":204.6,"p":4.3,"c":42.6,"g":1.7,"hora":"10:10","fonte":"TACO"},{"id":"mufjvwoq17pz2","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"salada-folhas","nome":"Salada de folhas (alface, rúcula, agrião)","qtd":50,"medida":"","kcal":8,"p":0.7,"c":1.2,"g":0.1,"hora":"10:10","fonte":"TACO"},{"id":"mufjvwoqo5339","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"hortalicas-cruas","nome":"Hortaliças cruas variadas (tomate, pepino, cenoura)","qtd":100,"medida":"","kcal":20,"p":0.9,"c":4.4,"g":0.1,"hora":"10:10","fonte":"estimativa"},{"id":"mufjw3mwhloze","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"cust-mufj32fmry86r","nome":"Frango Durum","qtd":100,"medida":"","kcal":195,"p":33,"c":2,"g":5,"hora":"10:11","fonte":"meu"},{"id":"mufz5msy5p8uj","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-mufz54q0ztt6j","nome":"Cookie bolo de cenoura (1/2)","qtd":50,"medida":"","kcal":190,"p":3,"c":25,"g":9,"hora":"17:18","fonte":"meu"},{"id":"mufz5uzyxda58","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-mufz4ii4t3a5g","nome":"Cookie cheesecake (1/2)","qtd":50,"medida":"","kcal":180,"p":3,"c":28,"g":9,"hora":"17:18","fonte":"meu"},{"id":"mufz6zdn6qyvx","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-muejd60182m43","nome":"Bolo prestígio fit","qtd":6,"medida":"","kcal":93,"p":3.1,"c":5.2,"g":6.8,"hora":"17:18","fonte":"meu"},{"id":"mug62em3v8p61","refeicaoId":"jantar-calorico","refeicaoNome":"Jantar calórico (sem ceia)","alimentoId":"cust-mug628frvjp01","nome":"Bentô Cenoura+Shimeji","qtd":100,"medida":"","kcal":633,"p":22,"c":141,"g":3,"hora":"20:32","fonte":"meu"}],"agua":0,"peso":null},{"data":"2026-09-23","planoId":"1.1","registros":[{"id":"mue246okj08zj","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"09:01","fonte":"estimativa"},{"id":"mue246okr5052","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"aveia","nome":"Aveia em flocos","qtd":15,"medida":"","kcal":59.1,"p":2.1,"c":10,"g":1.3,"hora":"09:01","fonte":"TACO"},{"id":"mue246oky4pj4","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":7.5,"medida":"","kcal":28.5,"p":6,"c":0.5,"g":0.3,"hora":"09:01","fonte":"rótulo"},{"id":"mue99jjem6urn","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"arroz-integral","nome":"Arroz integral cozido","qtd":110,"medida":"","kcal":136.4,"p":2.9,"c":28.4,"g":1.1,"hora":"12:25","fonte":"TACO"},{"id":"mue99jje7r589","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"feijao-preto","nome":"Feijão preto cozido","qtd":80,"medida":"","kcal":61.6,"p":3.6,"c":11.2,"g":0.4,"hora":"12:25","fonte":"TACO"},{"id":"mue9pu1vc58i5","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"frango-grelhado","nome":"Peito de frango grelhado","qtd":115,"medida":"","kcal":182.9,"p":36.8,"c":0,"g":2.9,"hora":"12:38","fonte":"TACO"},{"id":"muejc1s75jncg","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"17:07","fonte":"estimativa"},{"id":"muejc1s7kcoa7","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"aveia","nome":"Aveia em flocos","qtd":15,"medida":"","kcal":59.1,"p":2.1,"c":10,"g":1.3,"hora":"17:07","fonte":"TACO"},{"id":"muejcg44cq45l","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":7.5,"medida":"0.5 medidor","kcal":28.5,"p":6,"c":0.5,"g":0.3,"hora":"17:08","fonte":"rótulo"},{"id":"muejddtu71j1x","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"cust-muejd60182m43","nome":"Bolo prestígio fit","qtd":10,"medida":"","kcal":155,"p":5.2,"c":8.6,"g":11.3,"hora":"17:08","fonte":"meu"},{"id":"muevopn1ov4qb","refeicaoId":"jantar-calorico","refeicaoNome":"Jantar calórico (sem ceia)","alimentoId":"cust-muevoiymhjjbi","nome":"Bowl Fregola+Carne Durum","qtd":100,"medida":"","kcal":715,"p":41,"c":92,"g":16,"hora":"22:53","fonte":"meu"},{"id":"mufkyi38ybr5v","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"10:41","fonte":"rótulo"},{"id":"mufkyufkl390d","refeicaoId":"lanche","refeicaoNome":"Lanche da tarde","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"10:41","fonte":"rótulo"}],"agua":0,"peso":null},{"data":"2026-09-22","planoId":"1.2","registros":[{"id":"mucmjbh6hjy8r","refeicaoId":"intra-treino","refeicaoNome":"Intra-treino","alimentoId":"goiabada","nome":"Goiabada","qtd":25,"medida":"","kcal":67.5,"p":0.2,"c":16.8,"g":0,"hora":"09:02","fonte":"TACO"},{"id":"mucmn31n8hzxv","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"09:02","fonte":"estimativa"},{"id":"mucmn31nch04t","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"aveia","nome":"Aveia em flocos","qtd":10,"medida":"","kcal":39.4,"p":1.4,"c":6.7,"g":0.9,"hora":"09:02","fonte":"TACO"},{"id":"mucmn31ofi3nw","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":7.5,"medida":"","kcal":28.5,"p":6,"c":0.5,"g":0.3,"hora":"09:02","fonte":"rótulo"},{"id":"mucurkncs8qcv","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"frango-grelhado","nome":"Peito de frango grelhado","qtd":100,"medida":"","kcal":159,"p":32,"c":0,"g":2.5,"hora":"12:52","fonte":"TACO"},{"id":"mucurknctf2l7","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"arroz-integral","nome":"Arroz integral cozido","qtd":110,"medida":"","kcal":136.4,"p":2.9,"c":28.4,"g":1.1,"hora":"12:52","fonte":"TACO"},{"id":"mucurkncng8rb","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"feijao-preto","nome":"Feijão preto cozido","qtd":80,"medida":"","kcal":61.6,"p":3.6,"c":11.2,"g":0.4,"hora":"12:52","fonte":"TACO"},{"id":"mudgibflj5rq3","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-mudghylvjqd5v","nome":"Jantar Tonton","qtd":100,"medida":"","kcal":1675,"p":65,"c":175,"g":80,"hora":"23:00","fonte":"meu"},{"id":"mufkzq9o807f3","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"10:42","fonte":"rótulo"}],"agua":0,"peso":null},{"data":"2026-09-21","planoId":"1.1","registros":[{"id":"mubzxlam0s9xv","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"salada-de-frutas","nome":"Salada de frutas","qtd":70,"medida":"","kcal":35,"p":0.4,"c":9,"g":0.1,"hora":"22:29","fonte":"estimativa"},{"id":"mubzxlamyr513","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"whey","nome":"Whey protein (Max Titanium Chocolate)","qtd":15,"medida":"","kcal":57,"p":12,"c":1.1,"g":0.7,"hora":"22:29","fonte":"rótulo"},{"id":"mubzxqfr5zang","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"frango-grelhado","nome":"Peito de frango grelhado","qtd":80,"medida":"","kcal":127.2,"p":25.6,"c":0,"g":2,"hora":"22:29","fonte":"TACO"},{"id":"mubzxqfsk0oru","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"arroz-integral","nome":"Arroz integral cozido","qtd":110,"medida":"","kcal":136.4,"p":2.9,"c":28.4,"g":1.1,"hora":"22:29","fonte":"TACO"},{"id":"mubzxqfsl2aag","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"feijao-preto","nome":"Feijão preto cozido","qtd":80,"medida":"","kcal":61.6,"p":3.6,"c":11.2,"g":0.4,"hora":"22:29","fonte":"TACO"},{"id":"mubzxqfs0amfn","refeicaoId":"almoco","refeicaoNome":"Almoço","alimentoId":"salada-folhas","nome":"Salada de folhas (alface, rúcula, agrião)","qtd":50,"medida":"","kcal":8,"p":0.7,"c":1.2,"g":0.1,"hora":"22:29","fonte":"TACO"},{"id":"muc020veznw34","refeicaoId":"livre","refeicaoNome":"Refeição livre / extras","alimentoId":"cust-muc01jahq36jk","nome":"Combinado Tokujo - Montoza","qtd":100,"medida":"","kcal":1150,"p":75,"c":160,"g":30,"hora":"22:32","fonte":"meu"},{"id":"mufl086qdjcq2","refeicaoId":"cafe","refeicaoNome":"Café da manhã","alimentoId":"iogurte-natural-desnatado","nome":"Iogurte natural desnatado (Danone)","qtd":200,"medida":"","kcal":82,"p":8.2,"c":11.2,"g":0.4,"hora":"10:42","fonte":"rótulo"}],"agua":0,"peso":null}],"alimentosCustom":[{"id":"cust-mudghylvjqd5v","nome":"Jantar Tonton","cat":"Meus alimentos","kcal":1675,"p":65,"c":175,"g":80,"fonte":"meu","med":[]},{"id":"cust-mukhjjozd3hyd","nome":"Almoço Praça São Lourenço","cat":"Meus alimentos","kcal":2935,"p":124,"c":320,"g":130,"fonte":"meu","med":[]},{"id":"cust-muna7ma72guvg","nome":"Jantar Yuna","cat":"Meus alimentos","kcal":1400,"p":85,"c":130,"g":60,"fonte":"meu","med":[]},{"id":"cust-muoy8usyy0brx","nome":"Jantar Preta Maria","cat":"Meus alimentos","kcal":1460,"p":22,"c":213,"g":58,"fonte":"meu","med":[]},{"id":"cust-muprgm2569cfx","nome":"Almoço Elvira arroz de frango","cat":"Meus alimentos","kcal":1500,"p":80,"c":165,"g":60,"fonte":"meu","med":[]}]};
+var CUSTOM_REMOVIDOS = ["cust-muc01jahq36jk", "cust-muejd60182m43", "cust-muevoiymhjjbi", "cust-mufj32fmry86r", "cust-mufz4ii4t3a5g", "cust-mufz54q0ztt6j", "cust-mug628frvjp01", "cust-muhi4qd7ecnk6", "cust-muhihjj8ramsz", "cust-muipxrxp8g5el", "cust-muipz1cmrjd8u", "cust-mulynm74la336", "cust-muoabfv8mdgwt", "cust-muoac7dlg3dda", "cust-mupgvkb7cajl7"];
+async function aplicarSeed(){
+  if(!SEED_BACKUP || !SEED_BACKUP.dias) return;
+  var existentes = await Store.allDays(1000), tem={};
+  existentes.forEach(function(d){ tem[d.data]=1; });
+  for(var i=0;i<SEED_BACKUP.dias.length;i++){
+    var d=SEED_BACKUP.dias[i];
+    if(d && d.data && !tem[d.data]) await Store.saveDay(d);
+  }
+}
+
 /* ==========================================================================
    I. Boot
    ========================================================================== */
@@ -1144,6 +1479,7 @@ S.base=basePadrao();
 render();
 (async function(){
   await Store.init();
+  try{ await aplicarSeed(); }catch(e){}
   S.unsubBase=Store.watchBase(function(b){
     var pad=basePadrao();
     if(b && n(b.versao)>=3 && b.planos && b.planos.length){
@@ -1152,7 +1488,16 @@ render();
       S.base.config = Object.assign({}, pad.config, b.config||{});
       S.base.alimentosCustom = b.alimentosCustom||[];
     } else S.base = pad;
-    S.planoView=dayPlanoId(); render();
+    var antes=(S.base.alimentosCustom||[]).length;
+    S.base.alimentosCustom=(S.base.alimentosCustom||[]).filter(function(a){ return CUSTOM_REMOVIDOS.indexOf(a.id)<0; });
+    var mudou = S.base.alimentosCustom.length!==antes;
+    if(SEED_BACKUP && SEED_BACKUP.alimentosCustom){
+      var tem={}; (S.base.alimentosCustom||[]).forEach(function(a){ tem[a.id]=1; });
+      var falt=SEED_BACKUP.alimentosCustom.filter(function(a){ return !tem[a.id]; });
+      if(falt.length){ S.base.alimentosCustom=(S.base.alimentosCustom||[]).concat(falt); mudou=true; }
+    }
+    if(mudou) Store.saveBase(S.base);
+    S.planoView=planoAtualId(dayPlanoId()); render();
   });
   subscribeDay();
   Store.allDays(30).then(function(d){ S.hist=d; render(); });
