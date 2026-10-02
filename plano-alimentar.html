@@ -156,7 +156,7 @@ textarea.inp{min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size
 .btn.block{display:block;width:100%;text-align:center;padding:12px;border-radius:var(--radius-sm)}
 
 .sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(20,18,14,.45);display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:var(--surface);width:100%;max-width:580px;max-height:92vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;border:1px solid var(--line)}
+.sheet{background:var(--surface);width:100%;max-width:580px;max-height:88vh;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 16px);display:flex;flex-direction:column;border-radius:20px 20px 0 0;border:1px solid var(--line)}
 @media(min-width:640px){.sheet-bg{align-items:center;padding:20px}.sheet{border-radius:20px;max-height:86vh}}
 .sheet-bg.top{align-items:flex-start;padding:calc(env(safe-area-inset-top,0px) + 8px) 0 0}
 .sheet.full{height:calc(100vh - env(safe-area-inset-top,0px) - 8px);height:calc(100dvh - env(safe-area-inset-top,0px) - 8px);max-height:none;border-radius:20px 20px 0 0}
@@ -1119,8 +1119,8 @@ function viewPlanos(){
    G. Sheets
    ========================================================================== */
 function closeSheet(){ document.getElementById('sheetHost').innerHTML=''; S.pick=null; }
-function sheet(title,body,foot){
-  return '<div class="sheet-bg" data-act="closeBg"><div class="sheet">'
+function sheet(title,body,foot,cheia){
+  return '<div class="sheet-bg'+(cheia?' top':'')+'" data-act="closeBg"><div class="sheet'+(cheia?' full':'')+'">'
     +'<div class="sheet-head"><h3>'+title+'</h3><button class="icon-btn" data-act="close">×</button></div>'
     +'<div class="sheet-body">'+body+'</div>'
     +'<div class="sheet-foot">'+foot+'</div></div></div>';
@@ -1236,7 +1236,7 @@ function openOpcaoPlano(mealId,forcePlanoId,forceIdx){
   });
   if(o.obs) body+='<div class="obs">'+esc(o.obs)+'</div>';
   document.getElementById('sheetHost').innerHTML = sheet(esc(ref.nome), body,
-    '<div class="tot" id="opTot"></div><button class="btn" data-act="addOpcao" data-meal="'+esc(ref.id)+'" data-plano="'+esc(plano.id)+'" data-i="'+sel+'">Adicionar</button>');
+    '<div class="tot" id="opTot"></div><button class="btn" data-act="addOpcao" data-meal="'+esc(ref.id)+'" data-plano="'+esc(plano.id)+'" data-i="'+sel+'">Adicionar</button>',true);
   updOpTot();
 }
 function opSelecao(){
