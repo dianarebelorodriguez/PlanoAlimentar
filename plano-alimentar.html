@@ -647,7 +647,8 @@ P('suco-abacaxi-olgari','Olga Ri – Suco de abacaxi','Ri Hi','1 copo',155,0.5,3
 F('livup-frango-oriental','Livup – Frango oriental, arroz com brócolis e abóbora','Livup',115,9.8,11,3.4,'rótulo',[['marmita (300 g)',300]]),
 F('livup-frango-em-tiras','Livup – Frango em tiras, mix de quinoa, brócolis e cenoura','Livup',116,12,7.9,4.6,'rótulo',[['marmita (300 g)',300]]),
 P('gari','Gari (gengibre em conserva)','Japonês','1 porção',80,1,20,0,'meu'),
-P('wasabi','Wasabi','Japonês','1 porção',30,1,3,0.1,'meu')
+P('wasabi','Wasabi','Japonês','1 porção',30,1,3,0.1,'meu'),
+F('livup-hamburguer','Livup – Hambúrguer de carne, arroz integral com brócolis e legumes','Livup',113,9.2,11,3.4,'rótulo',[['marmita (300 g)',300]])
 ];
 
 /* ==========================================================================
@@ -671,7 +672,7 @@ var S_FEIJAO=[SB('arroz-branco',37.5,'1,5 col. sopa cheia (37,5 g)'),SB('lentilh
 var S_LIVUP=[SB('livup-carne-moida',300,'1 unidade (300 g)'),SB('livup-frango-cremoso',300,'1 unidade (300 g)'),SB('livup-escondidinho',300,'1 unidade (300 g)'),
   SB('livup-yakisoba-de-frango-com-legumes',300,'1 unidade (300 g)'),SB('livup-frango-oriental',300,'1 unidade (300 g)'),
   SB('livup-frango-em-tiras',300,'1 unidade (300 g)'),SB('livup-picadinho-de-carne-arroz-feijao-carioca-e-farofa',300,'1 unidade (300 g)'),
-  'Livup Hambúrguer de carne, arroz integral com brócolis e legumes – 1 unidade (300 g); sem tabela no banco de alimentos'];
+  SB('livup-hamburguer',300,'1 unidade (300 g)')];
 var S_DANONE=[SB('iogurte-batavo-morango-zero',340,'2 unidades (340 g)')];
 var S_PROT=[SB('barra-proteina-20g',0.5,'1/2 barrinha de 20 g de proteína')];
 
@@ -699,31 +700,31 @@ function opsIogurte(pref,rot,presc){ return [
     I('salada-de-frutas',70,'1 porção (70 g)'),
     I('banana-prata',55,'1 banana grande (55 g)')],'Com Yorgus Grego Desnatado, não comer aveia nem whey; comer uma banana grande junto da salada de frutas.')
 ];}
-function opsPao(pref,rot,presc){ return [
-  OP(pref+'-pao',rot,presc,[
+function opsPao(pref,num,presc){ return [
+  OP(pref+'-pao',num+' Pão · atum',presc,[
     I('atum-mimi',60,'1/2 pote (60 g)'),
     I('creme-ricota-light',30,'1 porção (30 g)'),
     I('pao-frances',50,'1 unidade (50 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_PAO)]),
-  OP(pref+'-ovos',rot+' · ovos',null,[
+  OP(pref+'-ovos',num+' Pão · ovos',null,[
     I('ovo-cozido',50,'1 ovo inteiro'),
     I('clara',66,'2 claras'),
     I('pao-frances',50,'1 unidade (50 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_PAO)],'Ovo inteiro e claras mexidos no lugar de atum e ricota.'),
-  OP(pref+'-minas',rot+' · queijo minas + YoPRO',null,[
+  OP(pref+'-minas',num+' Pão · queijo minas + YoPRO',null,[
     I('pao-frances',50,'1 unidade (50 g)'),
     I('queijo-minas',30,'30 g'),
     I('yopro-15g',1,'1 unidade (15 g de proteína)',S_PROT)],'Queijo minas e YoPRO no lugar de atum, ricota e fruta.'),
-  OP(pref+'-pq',rot+' · 3 pães de queijo + YoPRO',null,[
+  OP(pref+'-pq',num+' 3 pães de queijo + YoPRO',null,[
     I('pao-queijo',60,'3 coquetel ou 1 grande (60 g)'),
     I('yopro-15g',1,'1 unidade (15 g de proteína)',S_PROT)]),
-  OP(pref+'-barra',rot+' · barrinha + fruta',null,[
+  OP(pref+'-barra',num+' Barrinha + fruta',null,[
     I('barra-proteina-20g',1,'1 unidade'),
     I('maca',150,'1 maçã média/grande',[SB('salada-de-frutas',95,'salada de frutas (70-120 g)')])])
 ];}
 function mCafe(){ return {id:'cafe',nome:'Café da manhã',obs:'',opcoes:
   opsIogurte('cafe','1) Iogurte',[19.0,47.0,6.9,314])
-  .concat(opsPao('cafe','2) Pão',[18.4,46.7,5.9,313]))
+  .concat(opsPao('cafe','2)',[18.4,46.7,5.9,313]))
   .concat([
     OP('cafe-semlanche','3) Sem lanche da tarde',[22.1,2.9,2.7,123],[
       I('atum-mimi',120,'1 pote (120 g)',[SB('whey',30,'2 medidores (30 g)')]),
@@ -752,10 +753,10 @@ function mAlmoco(turbinado){
   return {id:'almoco',nome:'Almoço',obs:'',opcoes:ops};
 }
 function mLanche(){
-  var ops=opsIogurte('lan','Iogurte',[19.0,47.0,6.9,314]);
+  var ops=opsIogurte('lan','1) Iogurte',[19.0,47.0,6.9,314]);
   ops.push(OP('lan-pq3','3 pães de queijo + whey',null,[I('pao-queijo',60,'3 coquetel ou 1 grande (60 g)'),I('whey',22.5,'1,5 medidor (22,5 g)')]));
   ops.push(OP('lan-pq2','2 pães de queijo + fruta + whey',null,[I('pao-queijo',40,'2 coquetel (40 g)'),I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),I('whey',22.5,'1,5 medidor (22,5 g)')]));
-  ops=ops.concat(opsPao('lan','Pão (opção do café)',[18.4,46.7,5.9,313]));
+  ops=ops.concat(opsPao('lan','2)',[18.4,46.7,5.9,313]));
   return {id:'lanche',nome:'Lanche da tarde',obs:'Qualquer opção de café da manhã também pode ser usada como lanche da tarde.',opcoes:ops};
 }
 function mJantar(comSubs){
@@ -1196,7 +1197,7 @@ function openOpcaoPlano(mealId,forcePlanoId,forceIdx){
     body+='<div class="pill-row" style="margin-top:0">'+ref.opcoes.map(function(oo,i){
       return '<button class="pill" aria-pressed="'+(i===sel)+'" data-act="opPlanoSel" data-meal="'+esc(ref.id)+'" data-i="'+i+'">'+esc(oo.nome)+'</button>'; }).join('')+'</div>';
   }
-  body+='<div style="font-size:11.5px;color:var(--muted);margin:10px 0 4px">Desmarque o que não comeu, ajuste as quantidades e use ⇄ para trocar por um substituto.</div>';
+  body+='<div style="font-size:11.5px;color:var(--muted);margin:10px 0 4px">Desmarque o que não comeu, ajuste as quantidades e use Substituições para trocar um alimento.</div>';
   (o.itens||[]).forEach(function(i2,idx){
     var a=alim(i2.f), por=a&&a.por;
     var se=subsEstrut(i2), st=(i2.s||[]).filter(function(x){ return typeof x==='string'; });
@@ -1208,10 +1209,9 @@ function openOpcaoPlano(mealId,forcePlanoId,forceIdx){
      +'<span class="opU" data-i="'+idx+'" style="font-size:11px;color:var(--muted);width:40px">'+(por?'porção':'g')+'</span></div>';
     if(se.length){
       body+='<select class="inp opSub" data-i="'+idx+'" style="margin-top:6px;font-size:12.5px;padding:6px 8px">'
-       +'<option value="">Como no plano</option>'
-       +se.map(function(x,k){ return '<option value="'+k+'">⇄ '+esc(subTxt(x))+'</option>'; }).join('')+'</select>';
+       +'<option value="">Substituições</option>'
+       +se.map(function(x,k){ return '<option value="'+k+'">'+esc(subTxt(x))+'</option>'; }).join('')+'</select>';
     }
-    if(st.length) body+='<div style="font-size:11px;color:var(--muted);margin-top:4px">⇄ '+st.map(esc).join(' · ')+'</div>';
     body+='</div>';
   });
   if(o.obs) body+='<div class="obs">'+esc(o.obs)+'</div>';
