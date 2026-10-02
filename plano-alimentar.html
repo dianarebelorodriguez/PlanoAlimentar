@@ -155,6 +155,13 @@ textarea.inp{min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size
 .sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(20,18,14,.45);display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--surface);width:100%;max-width:580px;max-height:92vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;border:1px solid var(--line)}
 @media(min-width:640px){.sheet-bg{align-items:center;padding:20px}.sheet{border-radius:20px;max-height:86vh}}
+.sheet-bg.top{align-items:flex-start;padding:calc(env(safe-area-inset-top,0px) + 8px) 0 0}
+.sheet.full{height:calc(100vh - env(safe-area-inset-top,0px) - 8px);height:calc(100dvh - env(safe-area-inset-top,0px) - 8px);max-height:none;border-radius:20px 20px 0 0}
+@media(min-width:640px){.sheet-bg.top{padding:20px}.sheet.full{height:86vh;border-radius:20px}}
+.busca-top{padding:12px 16px 6px;flex:none;border-bottom:1px solid var(--line)}
+.busca-top form{margin:0}
+input[type=search]::-webkit-search-decoration,input[type=search]::-webkit-search-results-button{-webkit-appearance:none}
+input[type=search]{-webkit-appearance:none;appearance:none}
 .sheet-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex:none}
 .sheet-head h3{margin:0;font-size:16px;flex:1}
 .sheet-body{padding:13px 16px;overflow:auto;flex:1}
@@ -178,6 +185,7 @@ textarea.inp{min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size
 
 <header class="top"><div class="top-inner">
   <div class="brand">Plano Alimentar<small id="subTitle">planos &amp; registro</small></div>
+  <button class="icon-btn" data-act="openBanco" title="Banco de alimentos" aria-label="Banco de alimentos"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
   <button class="icon-btn" data-act="openAjustes" title="Ajustes">⚙</button>
   <button class="icon-btn" id="themeBtn" title="Tema">◐</button>
 </div></header>
@@ -564,8 +572,10 @@ P('esfirra-aberta','Esfirra aberta','Comida de rua','1 unidade',250,9,30,10,'pla
 P('empadao','Empadão','Comida de rua','1 fatia (~150 g)',450,14,38,28,'plano'),
 P('macarronada','Macarronada','Comida de rua','1 prato',800,35,105,28,'plano'),
 P('carbonara','Carbonara ou massa com muito queijo','Comida de rua','1 prato',1000,38,95,55,'plano'),
-P('steak-magra','Steak de carne magra','Comida de rua','150 g',325,40,0,19,'plano'),
-P('steak-gorda','Steak de carne gorda','Comida de rua','150 g',450,34,0,36,'plano'),
+F('steak-file','Steak de filé mignon (grelhado)','Comida de rua',220,32.8,0,8.8,'TACO',[['steak (150 g)',150],['steak (200 g)',200],['steak (250 g)',250]]),
+F('steak-contrafile','Steak de contrafilé sem gordura (grelhado)','Comida de rua',194,35.9,0,4.5,'TACO',[['steak (150 g)',150],['steak (200 g)',200],['steak (250 g)',250]]),
+F('steak-contrafile-gordura','Steak de contrafilé com gordura (grelhado)','Comida de rua',278,32.4,0,15.5,'TACO',[['steak (150 g)',150],['steak (200 g)',200],['steak (250 g)',250]]),
+F('steak-picanha','Steak de picanha sem gordura (grelhada)','Comida de rua',238,31.9,0,11.3,'TACO',[['steak (150 g)',150],['steak (200 g)',200],['steak (250 g)',250]]),
 P('brownie','Brownie','Doces e sobremesas','1 unidade (~100 g)',425,5,52,22,'plano'),
 P('sorvete-baccio','Sorvete Baccio di Latte','Doces e sobremesas','1 bola (~100 g)',275,4,32,14,'plano'),
 /* --- Japonês --- */
@@ -592,10 +602,12 @@ P('ceviche','Ceviche de peixe','Japonês','1 porção (~150 g)',150,25,6,3,'esti
 P('cachorro-quente','Cachorro-quente simples','Comida de rua','1 unidade',300,11,32,14,'estimativa'),
 P('misto-quente','Misto-quente','Comida de rua','1 unidade',280,15,28,12,'estimativa'),
 P('pao-na-chapa','Pão francês na chapa com manteiga','Comida de rua','1 unidade',230,6,30,9,'estimativa'),
-P('esfiha-fechada','Esfiha fechada de carne','Comida de rua','1 unidade',230,9,30,8,'estimativa'),
+F('esfiha-fechada','Esfiha fechada de carne','Comida de rua',346,11.9,26.2,21.4,'IBGE',[['unidade (100 g)',100],['unidade pequena (60 g)',60]]),
 P('quibe-frito','Quibe frito','Comida de rua','1 unidade (~80 g)',230,10,18,13,'estimativa'),
 P('crepe-salgado','Crepe salgado (frango e queijo)','Comida de rua','1 unidade',400,22,35,18,'estimativa'),
-P('acaraje','Acarajé completo','Comida de rua','1 unidade',450,12,35,30,'estimativa'),
+P('acaraje','Acarajé completo (bolinho, vatapá, caruru e camarão)','Comida de rua','1 unidade',730,26,39,52,'estimativa'),
+F('acaraje-bolinho','Acarajé (só o bolinho)','Comida de rua',289,8.3,19.1,19.9,'TACO',[['unidade (150 g)',150],['unidade pequena (100 g)',100]]),
+F('vatapa','Vatapá','Comida de rua',255,6,9.7,23.2,'TACO',[['col. sopa (25 g)',25],['porção (80 g)',80]]),
 P('churros','Churros recheado','Doces e sobremesas','1 unidade',250,3,32,12,'estimativa'),
 P('picole-fruta','Picolé de fruta','Doces e sobremesas','1 unidade',80,0,20,0,'estimativa'),
 P('picole-creme','Picolé cremoso','Doces e sobremesas','1 unidade',180,2,20,10,'estimativa'),
@@ -646,7 +658,7 @@ P('barra-proteina-20g','Barra de proteína (20 g de proteína)','Suplementos','1
 P('suco-abacaxi-olgari','Olga Ri – Suco de abacaxi','Ri Hi','1 copo',155,0.5,38,0,'plano'),
 F('livup-frango-oriental','Livup – Frango oriental, arroz com brócolis e abóbora','Livup',115,9.8,11,3.4,'rótulo',[['marmita (300 g)',300]]),
 F('livup-frango-em-tiras','Livup – Frango em tiras, mix de quinoa, brócolis e cenoura','Livup',116,12,7.9,4.6,'rótulo',[['marmita (300 g)',300]]),
-P('gari','Gari (gengibre em conserva)','Japonês','1 porção',80,1,20,0,'meu'),
+P('gari','Gari (gengibre em conserva)','Japonês','1 porção',14,0,4,0,'planilha'),
 P('wasabi','Wasabi','Japonês','1 porção',30,1,3,0.1,'meu'),
 F('livup-hamburguer','Livup – Hambúrguer de carne, arroz integral com brócolis e legumes','Livup',113,9.2,11,3.4,'rótulo',[['marmita (300 g)',300]])
 ];
@@ -677,60 +689,60 @@ var S_DANONE=[SB('iogurte-batavo-morango-zero',340,'2 unidades (340 g)')];
 var S_PROT=[SB('barra-proteina-20g',0.5,'1/2 barrinha de 20 g de proteína')];
 
 function opsIogurte(pref,rot,presc){ return [
-  OP(pref+'-iog',rot,presc,[
+  OP(pref+'-iog','Iogurte Danone',presc,[
     I('iogurte-natural-desnatado',160,'1 unidade (160 g)',S_DANONE),
     I('chia',15,'1 col. sopa cheia (15 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),
     I('aveia',15,'1 col. sopa cheia (15 g)'),
     I('whey',7.5,'1/2 medidor (7,5 g)')]),
-  OP(pref+'-batavo',rot+' · 1 Batavo + whey',null,[
+  OP(pref+'-batavo','Iogurte · 1 Batavo + whey',null,[
     I('iogurte-batavo-morango-zero',170,'1 unidade (170 g)'),
     I('chia',15,'1 col. sopa cheia (15 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),
     I('aveia',15,'1 col. sopa cheia (15 g)'),
     I('whey',15,'1 medidor completo (15 g)')],'Com só 1 Batavo, usar 1 medidor completo de whey.'),
-  OP(pref+'-semwhey',rot+' · sem whey',null,[
+  OP(pref+'-semwhey','Iogurte · sem whey',null,[
     I('iogurte-natural-desnatado',160,'1 unidade (160 g)',S_DANONE),
     I('chia',15,'1 col. sopa cheia (15 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_IOG),
     I('leite-po-desnatado',20,'2 col. sopa (20 g)')],'Sem whey: tirar aveia e whey e usar leite em pó desnatado Molico.'),
-  OP(pref+'-yorgus',rot+' · Yorgus Grego',null,[
+  OP(pref+'-yorgus','Iogurte · Yorgus Grego',null,[
     I('yorgus-grego-desnatado',130,'1 pote (130 g)'),
     I('chia',15,'1 col. sopa cheia (15 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)'),
     I('banana-prata',55,'1 banana grande (55 g)')],'Com Yorgus Grego Desnatado, não comer aveia nem whey; comer uma banana grande junto da salada de frutas.')
 ];}
 function opsPao(pref,num,presc){ return [
-  OP(pref+'-pao',num+' Pão · atum',presc,[
+  OP(pref+'-pao','Pão · atum',presc,[
     I('atum-mimi',60,'1/2 pote (60 g)'),
     I('creme-ricota-light',30,'1 porção (30 g)'),
     I('pao-frances',50,'1 unidade (50 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_PAO)]),
-  OP(pref+'-ovos',num+' Pão · ovos',null,[
+  OP(pref+'-ovos','Pão · ovos',null,[
     I('ovo-cozido',50,'1 ovo inteiro'),
     I('clara',66,'2 claras'),
     I('pao-frances',50,'1 unidade (50 g)'),
     I('salada-de-frutas',70,'1 porção (70 g)',S_FRUTA_PAO)],'Ovo inteiro e claras mexidos no lugar de atum e ricota.'),
-  OP(pref+'-minas',num+' Pão · queijo minas + YoPRO',null,[
+  OP(pref+'-minas','Pão · queijo minas + YoPRO',null,[
     I('pao-frances',50,'1 unidade (50 g)'),
     I('queijo-minas',30,'30 g'),
     I('yopro-15g',1,'1 unidade (15 g de proteína)',S_PROT)],'Queijo minas e YoPRO no lugar de atum, ricota e fruta.'),
-  OP(pref+'-pq',num+' 3 pães de queijo + YoPRO',null,[
+  OP(pref+'-pq','3 pães de queijo + YoPRO',null,[
     I('pao-queijo',60,'3 coquetel ou 1 grande (60 g)'),
     I('yopro-15g',1,'1 unidade (15 g de proteína)',S_PROT)]),
-  OP(pref+'-barra',num+' Barrinha + fruta',null,[
+  OP(pref+'-barra','Barrinha + fruta',null,[
     I('barra-proteina-20g',1,'1 unidade'),
-    I('maca',150,'1 maçã média/grande',[SB('salada-de-frutas',95,'salada de frutas (70-120 g)')])])
+    I('maca',100,'1/2 unidade grande (100 g)',[SB('salada-de-frutas',95,'salada de frutas (70-120 g)')])])
 ];}
 function mCafe(){ return {id:'cafe',nome:'Café da manhã',obs:'',opcoes:
   opsIogurte('cafe','1) Iogurte',[19.0,47.0,6.9,314])
   .concat(opsPao('cafe','2)',[18.4,46.7,5.9,313]))
   .concat([
-    OP('cafe-semlanche','3) Sem lanche da tarde',[22.1,2.9,2.7,123],[
+    OP('cafe-semlanche','Sem lanche da tarde',[22.1,2.9,2.7,123],[
       I('atum-mimi',120,'1 pote (120 g)',[SB('whey',30,'2 medidores (30 g)')]),
       I('mirtilo',20,'10 unidades (20 g)',S_BERRY)],
       'Para dias de almoço e jantar fora durante a semana, ou de uma grande refeição no fim de semana. Nesse dia, não fazer o lanche da tarde.'),
-    OP('cafe-semlanche-prot','3) Sem lanche · refeições proteicas',null,[
+    OP('cafe-semlanche-prot','Sem lanche · refeições proteicas',null,[
       I('salada-de-frutas',70,'1 fruta ou salada de frutas'),
       I('chia',15,'1 col. sopa (15 g)')],'Usar se as refeições fora forem proteicas. Nesse dia, não fazer o lanche da tarde.')
   ])};}
@@ -741,12 +753,12 @@ function marmita(arroz,subsArroz){ return [
   I('legumes-cozidos',55,'1 col. servir cheia (55 g)')].concat(salada(SAL4)); }
 function mAlmoco(turbinado){
   var ops=[
-    OP('alm-livup','1) Livup',[23.1,42.0,12.0,369],[I('livup-estrogonofe',300,'1 unidade (300 g)',S_LIVUP)].concat(salada(SAL4))),
-    OP('alm-casa','2) Casa',[26.8,51.3,9.9,388],marmita(125,[SB('arroz-integral',150,'150 g'),SB('macarrao',125,'125 g')]),'Versão marmita de casa para substituir a Livup.')];
+    OP('alm-livup','Livup',[23.1,42.0,12.0,369],[I('livup-estrogonofe',300,'1 unidade (300 g)',S_LIVUP)].concat(salada(SAL4))),
+    OP('alm-casa','Casa',[26.8,51.3,9.9,388],marmita(125,[SB('arroz-integral',150,'150 g'),SB('macarrao',125,'125 g')]),'Versão marmita de casa para substituir a Livup.')];
   if(turbinado){
-    ops.push(OP('alm-livup-turb','3) Livup turbinada',[26.1,80.6,9.6,514],
+    ops.push(OP('alm-livup-turb','Livup turbinada',[26.1,80.6,9.6,514],
       [I('livup-almondega',325,'1 unidade (325 g)')].concat(salada(SAL4)).concat([I('suco-laranja',150,'150 ml',S_SUCO)])));
-    ops.push(OP('alm-casa-turb','4) Casa turbinada',[29.3,79.4,10.2,514],
+    ops.push(OP('alm-casa-turb','Casa turbinada',[29.3,79.4,10.2,514],
       marmita(180,[SB('arroz-integral',216,'216 g'),SB('macarrao',180,'180 g')]).concat([I('suco-laranja',150,'150 ml',S_SUCO)]),
       'Versão marmita de casa para substituir a Livup turbinada.'));
   }
@@ -1114,18 +1126,22 @@ function mealNome(id){
 }
 
 /* --- busca de alimentos --- */
-function openBusca(mealId){
-  S.busca={q:'',cat:'Todos',meal:mealId};
-  document.getElementById('sheetHost').innerHTML = sheet(
-    esc(mealNome(mealId)),
-    '<input class="inp" id="qBusca" placeholder="buscar alimento…" autocomplete="off">'
-    +'<div class="cats" id="catRow"></div><ul class="flist" id="fList"></ul>',
-    '<div class="tot">Toque em um alimento para informar a quantidade.</div>'
-    +'<button class="btn ghost" data-act="novoAlimento">Criar alimento</button>');
+function openBusca(mealId,ger){
+  S.busca={q:'',cat:'Todos',meal:mealId,ger:!!ger};
+  var titulo = ger ? 'Banco de alimentos' : esc(mealNome(mealId));
+  document.getElementById('sheetHost').innerHTML =
+    '<div class="sheet-bg top" data-act="closeBg"><div class="sheet full">'
+    +'<div class="sheet-head"><h3>'+titulo+'</h3><button class="mini" data-act="novoAlimento">+ Criar</button><button class="icon-btn" data-act="close">×</button></div>'
+    +'<div class="busca-top"><form action="#" onsubmit="return false" autocomplete="off">'
+    +'<input class="inp" id="qBusca" name="busca-de-alimento" type="search" inputmode="search" enterkeyhint="search" placeholder="buscar alimento…" '
+    +'autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="none" data-form-type="other">'
+    +'</form><div class="cats" id="catRow"></div></div>'
+    +'<div class="sheet-body" style="padding-top:0"><ul class="flist" id="fList"></ul></div>'
+    +'</div></div>';
   renderBusca();
   var el=document.getElementById('qBusca');
-  el.addEventListener('input',function(){ S.busca.q=el.value; renderBusca(); });
-  setTimeout(function(){ el.focus(); },50);
+  el.addEventListener('input',function(){ S.busca.q=el.value; renderBusca(); var b=document.querySelector('.sheet.full .sheet-body'); if(b) b.scrollTop=0; });
+  el.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); el.blur(); } });
 }
 function renderBusca(){
   var cats=['Todos']; alimentos().forEach(function(a){ if(cats.indexOf(a.cat)<0) cats.push(a.cat); });
@@ -1352,6 +1368,7 @@ document.addEventListener('click',function(ev){
   if(act==='opcaoPlano'){ openOpcaoPlano(el.dataset.meal); return; }
   if(act==='opPlanoSel'){ openOpcaoPlano(el.dataset.meal,null,+el.dataset.i); return; }
   if(act==='openAjustes'){ openAjustes(); return; }
+  if(act==='openBanco'){ openBusca(null,true); return; }
   if(act==='export'){ openExport(); return; }
   if(act==='importUI'){ openImport(); return; }
 
@@ -1401,7 +1418,7 @@ document.addEventListener('click',function(ev){
     var bD=JSON.parse(JSON.stringify(S.base));
     bD.alimentosCustom=(bD.alimentosCustom||[]).filter(function(x){ return x.id!==idD; });
     if(ALIM_BASE.some(function(x){ return x.id===idD; })){ bD.alimentosOcultos=(bD.alimentosOcultos||[]); if(bD.alimentosOcultos.indexOf(idD)<0) bD.alimentosOcultos.push(idD); }
-    Store.saveBase(bD).then(function(){ toast('Alimento excluído do banco.'); openBusca(S.busca.meal); });
+    Store.saveBase(bD).then(function(){ toast('Alimento excluído do banco.'); openBusca(S.busca.meal,S.busca.ger); });
     return;
   }
   if(act==='salvarAlimento'){
@@ -1412,7 +1429,7 @@ document.addEventListener('click',function(ev){
     b.alimentosCustom.push({ id:'cust-'+uid(), nome:nome, cat:(document.getElementById('naCat').value||'Meus alimentos'),
       kcal:n(document.getElementById('naKcal').value), p:n(document.getElementById('naP').value),
       c:n(document.getElementById('naC').value), g:n(document.getElementById('naG').value), fonte:'meu', med:[] });
-    Store.saveBase(b).then(function(){ toast('Alimento salvo.'); openBusca(S.busca.meal); });
+    Store.saveBase(b).then(function(){ toast('Alimento salvo.'); openBusca(S.busca.meal,S.busca.ger); });
     return;
   }
   if(act==='saveCfg'){
