@@ -165,6 +165,7 @@ textarea.inp{min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size
 .busca-top form{margin:0}
 input[type=search]::-webkit-search-decoration,input[type=search]::-webkit-search-results-button{-webkit-appearance:none}
 input[type=search]{-webkit-appearance:none;appearance:none}
+@media (max-width:640px){ .inp, select.inp, input.inp{font-size:16px} }
 .sheet-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex:none}
 .sheet-head h3{margin:0;font-size:16px;flex:1}
 .sheet-body{padding:13px 16px;overflow:auto;flex:1}
@@ -1178,8 +1179,6 @@ function openQtd(alimentoId){
    +'<select class="inp qq" id="qMed"'+(porcao?' disabled':'')+'>'+meds.map(function(m,i){ return '<option value="'+m[1]+'" data-lbl="'+esc(m[0])+'"'+(i===selIdx?' selected':'')+'>'+esc(m[0])+'</option>'; }).join('')+'</select></div></div>'
    +'<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Refeição</label>'
    +'<select class="inp" id="qMeal">'+mealOptionsHTML(S.busca.meal)+'</select></div>'
-   +'<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Horário</label>'
-   +'<input class="inp" id="qHora" type="time" value="'+nowTime()+'"></div>'
    +'<div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">'
    +'<button class="mini" data-act="editAlim" data-id="'+esc(a.id)+'">Editar alimento</button>'
    +'<button class="mini" data-act="delAlim" data-id="'+esc(a.id)+'">Excluir do banco</button></div>';
@@ -1236,8 +1235,6 @@ function openOpcaoPlano(mealId,forcePlanoId,forceIdx){
     body+='</div>';
   });
   if(o.obs) body+='<div class="obs">'+esc(o.obs)+'</div>';
-  body+='<div style="margin-top:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">Horário</label>'
-   +'<input class="inp" id="opHora" type="time" value="'+nowTime()+'"></div>';
   document.getElementById('sheetHost').innerHTML = sheet(esc(ref.nome), body,
     '<div class="tot" id="opTot"></div><button class="btn" data-act="addOpcao" data-meal="'+esc(ref.id)+'" data-plano="'+esc(plano.id)+'" data-i="'+sel+'">Adicionar</button>');
   updOpTot();
@@ -1391,13 +1388,13 @@ document.addEventListener('click',function(ev){
     var qv=document.getElementById('qVal').value;
     var aa=alim(el.dataset.id);
     var medTxt = (aa&&aa.por) ? aa.por : (n(medSel.value)===1?'':(qv+' '+medLbl));
-    addRows([ novoRegistro(el.dataset.id,g, medTxt, mid, mealNome(mid), document.getElementById('qHora').value) ]);
+    addRows([ novoRegistro(el.dataset.id,g, medTxt, mid, mealNome(mid), nowTime()) ]);
     closeSheet(); return;
   }
   if(act==='addOpcao'){
     var sel=opSelecao();
     if(!sel.length){ toast('Selecione ao menos um alimento.'); return; }
-    var mid2=el.dataset.meal, hora=document.getElementById('opHora').value;
+    var mid2=el.dataset.meal, hora=nowTime();
     addRows(sel.map(function(x){ return novoRegistro(x.f,x.g,'',mid2,mealNome(mid2),hora); }));
     closeSheet(); return;
   }
